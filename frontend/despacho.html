@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Órdenes de despacho — La Chilena</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Mrs+Saint+Delafield&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body>
+
+<div id="app-header"></div>
+
+<main class="page">
+  <div class="section-head">
+    <div>
+      <h2>Órdenes de despacho</h2>
+      <p>Pedidos pagados, en el orden en que llegaron, listos para cocina y reparto.</p>
+    </div>
+    <button class="btn btn-ghost no-print" onclick="window.print()">Imprimir todas</button>
+  </div>
+  <div id="dispatchList"></div>
+  <div id="dispatchPager" class="no-print" style="display:flex; gap:12px; align-items:center; justify-content:center; margin-top:16px;"></div>
+</main>
+
+<footer class="site-footer">
+  La Chilena · Empanadas artesanales<br>
+  <a href="ayuda.html" class="footer-link">Centro de Ayuda y Manuales</a>
+</footer>
+<div id="app-tabbar"></div>
+
+<script src="assets/js/api.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/auth.js"></script>
+<script>
+const PAGE_SIZE = 20;
+let dispatchOrders = [];
+let currentPage = 1;
+
+async function loadDispatch(page) {
+  if (page) currentPage = page;
+  const el = document.getElementById('dispatchList');
+  try {
+    const res = await API.get('/orders', { page: currentPage, size: PAGE_SIZE });
+    if (!res.items.length && currentPage > 1 && res.total) return loadDispatch(Math.ceil(res.total / PAGE_SIZE));
+    dispatchOrders = res.items || [];
+    renderDispatch();
+    renderPager(document.getElementById('dispatchPager'), currentPage, PAGE_SIZE, res.total, loadDispatch);
+  } catch (err) {
+    el.innerHTML = `<div class="empty-state"><p>${esc(err.userMessage || 'No se pudieron cargar las órdenes de despacho.')}</p></div>`;
+  }
+}
+
+function renderDispatch() {
+  const el = document.getElementById('dispatchList');
+  if (dispatchOrders.length === 0) {
+    el.innerHTML = `<div class="empty-state"><div class="glyph">🧾</div><p>No hay órdenes de despacho pendientes.</p></div>`;
+    return;
+  }
+  el.innerHTML = dispatchOrders.map((o, idx) => {
+    let badgeLabel = 'Pagado — listo para preparar';
+    let actionBtn = `<button class="btn btn-ghost btn-sm" data-id="${esc(o.id)}" data-to="en_preparacion">Marcar en preparación</button>`;
+    if (o.status === 'en_preparacion') {
+      badgeLabel = 'En preparación';
+      actionBtn = `<button class="btn btn-primary btn-sm" data-id="${esc(o.id)}" data-to="despachado">Marcar despachado</button>`;
+    } else if (o.status === 'despachado') {
+      badgeLabel = 'En reparto';
+      actionBtn = `<button class="btn btn-primary btn-sm" data-id="${esc(o.id)}" data-to="entregado">Confirmar entrega</button>`;
+    }
+    return `
+      <div class="dispatch-card">
+        <div class="order-top">
+          <span class="order-id">#${(currentPage - 1) * PAGE_SIZE + idx + 1} — ${esc(o.id)} · ${esc(o.clientName || 'Cliente')}</span>
+          <span class="badge ready">${badgeLabel}</span>
+        </div>
+        <div class="order-date">${fmtDate(o.createdAt)} · Entrega: <strong>${esc(o.deliveryAddress || '—')}</strong></div>
+        <ul class="items">${(o.items || []).map(it => `<li>${it.quantity} × ${esc(it.name)}</li>`).join('')}</ul>
+        <div class="order-foot no-print">
+          <span></span>
+          ${actionBtn}
+        </div>
+      </div>`;
+  }).join('');
+
+  el.querySelectorAll('[data-to]').forEach(btn => {
+    btn.addEventListener('click', () => advanceOrder(btn.dataset.id, btn.dataset.to));
+  });
+}
+
+async function advanceOrder(orderId, to) {
+  try {
+    await API.post(`/orders/${encodeURIComponent(orderId)}/transitions`, { to });
+    const msg = to === 'en_preparacion' ? 'Pedido en preparación.' : to === 'despachado' ? 'Pedido despachado.' : 'Pedido entregado.';
+    showToast(msg);
+    await loadDispatch();
+  } catch (err) {
+    showToast(err.userMessage || 'No se pudo actualizar el estado del pedido.');
+  }
+}
+
+(async function () {
+  const user = await initSession(['despacho'], 'despacho');
+  if (!user) return;
+  await loadDispatch();
+})();
+</script>
+</body>
+</html>

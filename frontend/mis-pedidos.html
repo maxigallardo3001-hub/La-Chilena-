@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mis pedidos — La Chilena</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Mrs+Saint+Delafield&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body>
+
+<div id="app-header"></div>
+
+<main class="page">
+  <div class="section-head">
+    <div>
+      <h2>Mis pedidos</h2>
+      <p>Historial y estado de tus pedidos en línea.</p>
+    </div>
+    <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+      <button class="btn btn-ghost btn-sm" id="myDataBtn" type="button">Mis datos</button>
+      <select id="statusFilter" style="padding:8px 12px; border:1px solid var(--line); border-radius:8px; background:var(--white); font-size:13.5px;">
+        <option value="">Todos los estados</option>
+        <option value="PENDIENTE_PAGO">Pago pendiente</option>
+        <option value="PAGADO">Pago confirmado</option>
+        <option value="EN_PREPARACION">En preparación</option>
+        <option value="DESPACHADO">Despachado</option>
+        <option value="ENTREGADO">Entregado</option>
+        <option value="ANULADO">Anulado</option>
+      </select>
+    </div>
+  </div>
+
+  <div id="ordersList"></div>
+  <div id="moreWrap" style="text-align:center; margin-top:16px;" hidden>
+    <button class="btn btn-ghost btn-sm" id="loadMoreBtn" onclick="loadMoreOrders()">Cargar más pedidos</button>
+  </div>
+</main>
+
+<div id="app-tabbar"></div>
+
+<div id="cancelModal" class="win-modal-overlay">
+  <div style="background:var(--white); border-radius:14px; padding:22px; max-width:420px; width:100%;">
+    <h3 style="margin-bottom:8px;">Anular pedido</h3>
+    <p style="font-size:13.5px; color:var(--ink-soft); margin-bottom:12px;">Indica el motivo de la anulación.</p>
+    <select id="cancelReason" style="width:100%; padding:10px; border:1px solid var(--line); border-radius:8px; margin-bottom:14px;">
+      <option value="Solicitud del cliente">Solicitud del cliente</option>
+      <option value="Error en el pedido">Error en el pedido</option>
+      <option value="Producto sin stock">Producto sin stock</option>
+      <option value="Otro motivo">Otro motivo</option>
+    </select>
+    <div style="display:flex; gap:10px;">
+      <button class="btn btn-ghost btn-block" onclick="closeCancelModal()">Volver</button>
+      <button class="btn btn-primary btn-block" id="confirmCancelBtn" onclick="submitCancel()">Confirmar anulación</button>
+    </div>
+  </div>
+</div>
+
+<div id="detailModal" class="win-modal-overlay">
+  <div class="win-modal" style="width:520px;">
+    <div class="win-modal-header">
+      <span id="detailTitle">Detalle del pedido</span>
+      <button type="button" class="win-modal-close" onclick="document.getElementById('detailModal').style.display='none'">&times;</button>
+    </div>
+    <div class="win-modal-body" id="detailBody" style="font-size:13.5px;"></div>
+    <div class="win-modal-footer" id="detailFooter">
+      <button type="button" class="win-btn" onclick="document.getElementById('detailModal').style.display='none'">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<div id="receiptModal" class="win-modal-overlay">
+  <div class="win-modal" style="width:440px;">
+    <div class="win-modal-header">
+      <span id="receiptTitle">Boleta electrónica</span>
+      <button type="button" class="win-modal-close" onclick="document.getElementById('receiptModal').style.display='none'">&times;</button>
+    </div>
+    <div class="win-modal-body" id="receiptBody" style="font-size:13.5px;"></div>
+    <div class="win-modal-footer">
+      <button type="button" class="win-btn" onclick="document.getElementById('receiptModal').style.display='none'">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<footer class="site-footer">
+  La Chilena · Empanadas artesanales<br>
+  <a href="ayuda.html" class="footer-link">Centro de Ayuda y Manuales</a>
+</footer>
+
+<script src="assets/js/api.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/auth.js"></script>
+<script src="assets/js/profile.js"></script>
+<script>
+const MIS_PEDIDOS_QUERY = `
+  query MisPedidos($estado: EstadoPedido, $primeros: Int, $despues: String) {
+    misPedidos(estado: $estado, primeros: $primeros, despues: $despues) {
+      edges {
+        cursor
+        node {
+          id
+          creadoEn
+          estado
+          total
+          puedeAnular
+          items {
+            nombre
+            cantidad
+            precioUnitario
+            producto {
+              descripcion
+              disponible
+            }
+          }
+        }
+      }
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+    }
+  }
+`;
+
+const RESUMEN_QUERY = `
+  query Resumen($id: ID!) {
+    resumenPedido(orderId: $id) {
+      pedido {
+        id
+        creadoEn
+        estado
+        total
+        puedeAnular
+        items {
+          nombre
+          cantidad
+          precioUnitario
+          producto {
+            descripcion
+            disponible
+          }
+        }
+      }
+      medioPago
+      pago {
+        estado
+        pagadoEn
+        boletaDisponible
+      }
+      historial {
+        estado
+        en
+      }
+      direccionEntrega
+    }
+  }
+`;
+
+let loadedOrders = [];
+let endCursor = null;
+let hasNextPage = false;
+let cancelTargetId = null;
+
+async function fetchOrders(reset = true) {
+  const el = document.getElementById('ordersList');
+  if (reset) {
+    loadedOrders = [];
+    endCursor = null;
+    hasNextPage = false;
+  }
+  const estado = document.getElementById('statusFilter').value || undefined;
+  try {
+    const res = await API.graphql('MisPedidos', MIS_PEDIDOS_QUERY, {
+      estado,
+      primeros: 10,
+      despues: reset ? undefined : endCursor,
+    });
+    const conn = res && res.data && res.data.misPedidos;
+    if (!conn) {
+      const msg = (res && res.errors && res.errors[0] && res.errors[0].message) || 'No se pudieron consultar los pedidos.';
+      el.innerHTML = `<div class="empty-state"><p>${esc(msg)}</p></div>`;
+      return;
+    }
+    const nodes = (conn.edges || []).map(e => e.node);
+    loadedOrders = reset ? nodes : loadedOrders.concat(nodes);
+    endCursor = conn.pageInfo ? conn.pageInfo.endCursor : null;
+    hasNextPage = Boolean(conn.pageInfo && conn.pageInfo.hasNextPage);
+    renderOrders();
+  } catch (err) {
+    el.innerHTML = `<div class="empty-state"><p>${esc(err.userMessage || 'No se pudieron consultar los pedidos.')}</p></div>`;
+  }
+}
+
+function loadMoreOrders() {
+  if (hasNextPage && endCursor) fetchOrders(false);
+}
+
+function renderOrders() {
+  const el = document.getElementById('ordersList');
+  document.getElementById('moreWrap').hidden = !hasNextPage;
+  if (loadedOrders.length === 0) {
+    el.innerHTML = `<div class="empty-state"><div class="glyph">🧾</div><p>Todavía no tienes pedidos registrados.</p></div>`;
+    return;
+  }
+  el.innerHTML = loadedOrders.map(o => {
+    const itemCount = (o.items || []).reduce((s, it) => s + it.cantidad, 0);
+    const st = statusInfo(o.estado);
+    const itemsText = (o.items || []).map(it => {
+      const avail = it.producto && it.producto.disponible === false ? ' (agotado hoy)' : '';
+      return `${esc(it.nombre)} x${it.cantidad}${avail}`;
+    }).join(', ');
+    const paidStates = ['PAGADO', 'EN_PREPARACION', 'DESPACHADO', 'ENTREGADO'];
+    const canViewReceipt = paidStates.includes(o.estado);
+    return `
+      <div class="order-card">
+        <div class="order-top">
+          <span class="order-id">${esc(o.id)}</span>
+          <span class="badge ${st.cls}">${esc(st.label)}</span>
+        </div>
+        <div class="order-date">${fmtDate(o.creadoEn)} · ${itemCount} ítems · ${fmtCLP(o.total)}</div>
+        <div class="order-foot">
+          <span>${itemsText}</span>
+          <div style="display:flex; gap:12px; align-items:center;">
+            <button class="link-btn" onclick="openDetailModal('${esc(o.id)}')">Ver detalle</button>
+            ${canViewReceipt ? `<button class="link-btn" onclick="openReceiptModal('${esc(o.id)}')">Ver boleta</button>` : ''}
+            ${o.puedeAnular ? `<button class="link-btn" onclick="openCancelModal('${esc(o.id)}')">Anular</button>` : ''}
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+async function openDetailModal(orderId) {
+  const modal = document.getElementById('detailModal');
+  const title = document.getElementById('detailTitle');
+  const body = document.getElementById('detailBody');
+  title.textContent = `Pedido ${orderId}`;
+  body.innerHTML = '<p>Consultando resumen…</p>';
+  modal.style.display = 'flex';
+
+  try {
+    const res = await API.graphql('Resumen', RESUMEN_QUERY, { id: orderId });
+    const summary = res && res.data && res.data.resumenPedido;
+    if (!summary) {
+      const msg = (res && res.errors && res.errors[0] && res.errors[0].message) || 'No se pudo cargar el detalle.';
+      body.innerHTML = `<p style="color:var(--maroon);">${esc(msg)}</p>`;
+      return;
+    }
+    const p = summary.pedido;
+    const st = statusInfo(p.estado);
+    const payLabel = summary.medioPago === 'SERVIPAG' ? 'Servipag' : 'Depósito bancario';
+    const pagoInfo = summary.pago
+      ? `${esc(summary.pago.estado)}${summary.pago.pagadoEn ? ' (' + fmtDate(summary.pago.pagadoEn) + ')' : ''}`
+      : 'Pendiente';
+    const itemsHtml = (p.items || []).map(it => `
+      <div style="display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid var(--line);">
+        <div>
+          <strong>${esc(it.nombre)}</strong> x${it.cantidad}
+          ${it.producto && it.producto.descripcion ? `<div style="font-size:12px; color:var(--ink-soft);">${esc(it.producto.descripcion)}</div>` : ''}
+        </div>
+        <div style="font-weight:600;">${fmtCLP(it.precioUnitario * it.cantidad)}</div>
+      </div>`).join('');
+    const histHtml = (summary.historial || []).map(h => `
+      <li style="margin-bottom:4px;"><strong>${esc(statusInfo(h.estado).label)}</strong> — ${fmtDate(h.en)}</li>`).join('');
+
+    body.innerHTML = `
+      <div style="margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
+        <span class="badge ${st.cls}">${esc(st.label)}</span>
+        <strong>Total: ${fmtCLP(p.total)}</strong>
+      </div>
+      <p style="margin:0 0 6px;"><strong>Dirección de entrega:</strong> ${esc(summary.direccionEntrega || '—')}</p>
+      <p style="margin:0 0 12px;"><strong>Medio de pago:</strong> ${payLabel} · <strong>Estado cobro:</strong> ${pagoInfo}</p>
+      <h4 style="margin:0 0 6px; font-size:14px;">Productos</h4>
+      <div style="margin-bottom:12px;">${itemsHtml}</div>
+      <h4 style="margin:0 0 6px; font-size:14px;">Historial de estados</h4>
+      <ul style="margin:0; padding-left:18px; color:var(--ink-soft);">${histHtml}</ul>
+      ${summary.pago && summary.pago.boletaDisponible
+        ? `<div style="margin-top:14px;"><button class="btn btn-primary btn-sm" onclick="document.getElementById('detailModal').style.display='none'; openReceiptModal('${esc(p.id)}')">Ver boleta electrónica</button></div>`
+        : ''}`;
+  } catch (err) {
+    body.innerHTML = `<p style="color:var(--maroon);">${esc(err.userMessage || 'No se pudo cargar el detalle.')}</p>`;
+  }
+}
+
+async function openReceiptModal(orderId) {
+  const modal = document.getElementById('receiptModal');
+  const title = document.getElementById('receiptTitle');
+  const body = document.getElementById('receiptBody');
+  title.textContent = `Boleta — ${orderId}`;
+  body.innerHTML = '<p>Cargando boleta…</p>';
+  modal.style.display = 'flex';
+
+  try {
+    const r = await API.get(`/orders/${encodeURIComponent(orderId)}/receipt`);
+    title.textContent = `Boleta ${r.receiptId}`;
+    const lines = (r.items || []).map(it => `
+      <div style="display:flex; justify-content:space-between; padding:4px 0;">
+        <span>${it.quantity} x ${esc(it.name)}</span>
+        <span>${fmtCLP(it.unitPrice * it.quantity)}</span>
+      </div>`).join('');
+    body.innerHTML = `
+      <p style="margin:0 0 8px; color:var(--ink-soft);">Pedido: <strong>${esc(r.orderId)}</strong> · Emitida: ${fmtDate(r.issuedAt)}</p>
+      <div style="border-top:1px solid var(--line); border-bottom:1px solid var(--line); padding:8px 0; margin-bottom:10px;">
+        ${lines}
+      </div>
+      <div style="display:flex; justify-content:space-between; margin-bottom:4px;"><span>Monto Neto</span><span>${fmtCLP(r.net)}</span></div>
+      <div style="display:flex; justify-content:space-between; margin-bottom:6px;"><span>IVA (19%)</span><span>${fmtCLP(r.iva)}</span></div>
+      <div style="display:flex; justify-content:space-between; font-weight:700; font-size:15px;"><span>Total</span><span>${fmtCLP(r.total)}</span></div>`;
+  } catch (err) {
+    body.innerHTML = `<p style="color:var(--maroon);">${esc(err.userMessage || 'La boleta aún no está disponible.')}</p>`;
+  }
+}
+
+function openCancelModal(id) {
+  cancelTargetId = id;
+  document.getElementById('cancelModal').style.display = 'flex';
+}
+
+function closeCancelModal() {
+  cancelTargetId = null;
+  document.getElementById('cancelModal').style.display = 'none';
+}
+
+async function submitCancel() {
+  if (!cancelTargetId) return;
+  const btn = document.getElementById('confirmCancelBtn');
+  btn.disabled = true;
+  try {
+    const reason = document.getElementById('cancelReason').value;
+    await API.post(`/orders/${encodeURIComponent(cancelTargetId)}/cancellation`, { reason });
+    showToast('Pedido anulado.');
+    closeCancelModal();
+    await fetchOrders(true);
+  } catch (err) {
+    showToast(err.userMessage || 'No se pudo anular el pedido.');
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+document.getElementById('statusFilter').addEventListener('change', () => fetchOrders(true));
+
+(async function () {
+  const user = await initSession(['cliente'], 'orders');
+  if (!user) return;
+  document.getElementById('myDataBtn').addEventListener('click', () => openClientProfile(user.id));
+  await fetchOrders(true);
+})();
+</script>
+</body>
+</html>

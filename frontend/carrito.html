@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mi carrito — La Chilena</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Mrs+Saint+Delafield&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body>
+
+<div id="app-header"></div>
+
+<main class="page">
+  <div class="section-head">
+    <div>
+      <h2>Mi carrito</h2>
+      <p>Revisa tu pedido antes de confirmar.</p>
+    </div>
+  </div>
+
+  <div id="cartError" class="mensaje-error">
+    <p class="titulo-error">No se pudo confirmar el pedido</p>
+    <p id="cartErrorMsg" class="detalle-error"></p>
+  </div>
+
+  <div id="cartEmpty" class="empty-state" hidden>
+    <div class="glyph">🛒</div>
+    <p>Tu carrito está vacío por ahora.</p>
+    <a href="index.html" class="btn btn-primary">Ir al menú</a>
+  </div>
+
+  <div class="cart-layout" id="cartLayout" style="display:none;">
+    <div class="cart-list" id="cartList"></div>
+
+    <div class="summary">
+      <h3>Resumen del pedido</h3>
+      <div id="summaryLines"></div>
+      <div class="sum-row"><span>Despacho (radio 3 km)</span><span>Gratis</span></div>
+      <div class="sum-row total"><span>Total estimado</span><span id="cartTotal">$0</span></div>
+
+      <h3 style="margin-top:6px;">Método de pago</h3>
+      <label class="pay-option selected" data-pay="servipag">
+        <input type="radio" name="pay" checked>
+        <span><strong>Servipag</strong><small>Pago en línea mediante Servipag</small></span>
+      </label>
+      <label class="pay-option" data-pay="deposito">
+        <input type="radio" name="pay">
+        <span><strong>Depósito bancario</strong><small>Transferencia a la cuenta del local</small></span>
+      </label>
+
+      <button class="btn btn-primary btn-block" id="confirmBtn" onclick="confirmOrder()">Confirmar pedido</button>
+    </div>
+  </div>
+</main>
+
+<div id="paymentInfoModal" class="win-modal-overlay">
+  <div class="win-modal" style="width:440px;">
+    <div class="win-modal-header">
+      <span>Pedido registrado</span>
+    </div>
+    <div class="win-modal-body">
+      <p style="margin:0 0 10px; font-weight:600;" id="createdOrderTitle"></p>
+      <p style="margin:0 0 12px; font-size:14px; color:var(--ink-soft);" id="createdOrderInstructions"></p>
+      <p style="margin:0; font-size:13px; color:var(--ink-soft);">
+        Una vez confirmado el pago por caja, tu pedido pasará a preparación y despacho.
+      </p>
+    </div>
+    <div class="win-modal-footer">
+      <button type="button" class="win-btn win-btn-primary" onclick="location.href='mis-pedidos.html'">Ir a Mis pedidos</button>
+    </div>
+  </div>
+</div>
+
+<footer class="site-footer">
+  La Chilena · Empanadas artesanales<br>
+  <a href="ayuda.html" class="footer-link">Centro de Ayuda y Manuales</a>
+</footer>
+<div id="app-tabbar"></div>
+
+<script src="assets/js/api.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/auth.js"></script>
+<script>
+let currentUser = null;
+let cart = {};
+let catalogById = {};
+let selectedPay = 'servipag';
+let pendingIdempotencyKey = null;
+
+function changeQty(id, delta) {
+  cart[id] = Math.min(50, (cart[id] || 0) + delta);
+  if (cart[id] <= 0) delete cart[id];
+  pendingIdempotencyKey = null;
+  saveCart(currentUser.id, cart);
+  renderHeader('cart');
+  renderCart();
+}
+
+function renderCart() {
+  const entries = Object.entries(cart).filter(([id, qty]) => qty > 0 && catalogById[id]);
+  const empty = document.getElementById('cartEmpty');
+  const layout = document.getElementById('cartLayout');
+  if (entries.length === 0) {
+    empty.hidden = false;
+    layout.style.display = 'none';
+    return;
+  }
+  empty.hidden = true;
+  layout.style.display = 'grid';
+
+  const list = document.getElementById('cartList');
+  list.innerHTML = entries.map(([id, qty]) => {
+    const p = catalogById[id];
+    const unit = p.finalPrice || p.price;
+    return `
+      <div class="cart-item">
+        <div class="thumb">🥟</div>
+        <div class="info">
+          <h4>${esc(p.name)}</h4>
+          <span>${fmtCLP(unit)} c/u${p.promotion ? ` · ${esc(p.promotion.name)}` : ''}${!p.available ? ' · <strong style="color:var(--maroon);">Agotado</strong>' : ''}</span>
+        </div>
+        <div class="stepper">
+          <button data-dec="${esc(id)}">−</button><span>${qty}</span><button data-inc="${esc(id)}">+</button>
+        </div>
+        <div class="item-total">${fmtCLP(unit * qty)}</div>
+      </div>`;
+  }).join('');
+
+  list.querySelectorAll('[data-inc]').forEach(b => b.addEventListener('click', () => changeQty(b.dataset.inc, 1)));
+  list.querySelectorAll('[data-dec]').forEach(b => b.addEventListener('click', () => changeQty(b.dataset.dec, -1)));
+
+  const total = entries.reduce((sum, [id, qty]) => {
+    const p = catalogById[id];
+    return sum + (p ? (p.finalPrice || p.price) * qty : 0);
+  }, 0);
+
+  document.getElementById('summaryLines').innerHTML = entries.map(([id, qty]) => {
+    const p = catalogById[id];
+    const unit = p.finalPrice || p.price;
+    return `<div class="sum-row"><span>${esc(p.name)} x${qty}</span><span>${fmtCLP(unit * qty)}</span></div>`;
+  }).join('');
+  document.getElementById('cartTotal').textContent = fmtCLP(total);
+}
+
+document.querySelectorAll('.pay-option').forEach(opt => {
+  opt.addEventListener('click', () => {
+    document.querySelectorAll('.pay-option').forEach(o => {
+      o.classList.remove('selected');
+      o.querySelector('input').checked = false;
+    });
+    opt.classList.add('selected');
+    opt.querySelector('input').checked = true;
+    selectedPay = opt.dataset.pay;
+    pendingIdempotencyKey = null;
+  });
+});
+
+async function confirmOrder() {
+  const errBox = document.getElementById('cartError');
+  const errMsg = document.getElementById('cartErrorMsg');
+  errBox.style.display = 'none';
+
+  const entries = Object.entries(cart).filter(([id, qty]) => qty > 0 && catalogById[id]);
+  if (entries.length === 0) return;
+
+  const btn = document.getElementById('confirmBtn');
+  btn.disabled = true;
+  if (!pendingIdempotencyKey) pendingIdempotencyKey = API.idempotencyKey();
+
+  try {
+    const items = entries.map(([productId, quantity]) => ({ productId, quantity }));
+    const created = await API.post('/orders', { items, paymentMethod: selectedPay }, { 'Idempotency-Key': pendingIdempotencyKey });
+    clearCart(currentUser.id);
+    cart = {};
+    pendingIdempotencyKey = null;
+    renderHeader('cart');
+
+    document.getElementById('createdOrderTitle').textContent = `Pedido ${created.id} por ${fmtCLP(created.total)}`;
+    document.getElementById('createdOrderInstructions').textContent =
+      (created.payment && created.payment.instructions) || 'Tu pedido quedó pendiente de confirmación de pago.';
+    document.getElementById('paymentInfoModal').style.display = 'flex';
+  } catch (err) {
+    errBox.style.display = 'block';
+    if (err.code === 'DELIVERY_OUT_OF_ZONE' && err.detail && err.detail.enabledComunas) {
+      errMsg.textContent = `${err.userMessage}. Comunas con reparto habilitado: ${err.detail.enabledComunas.join(', ')}.`;
+    } else {
+      errMsg.textContent = err.userMessage || err.message || 'No se pudo procesar el pedido.';
+    }
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+(async function () {
+  currentUser = await initSession(['cliente'], 'cart');
+  if (!currentUser) return;
+  cart = getCart(currentUser.id);
+  try {
+    const res = await API.get('/products');
+    for (const p of (res.items || [])) catalogById[p.id] = p;
+  } catch (_) {}
+  renderCart();
+})();
+</script>
+</body>
+</html>

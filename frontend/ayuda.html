@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ayuda y Manuales — La Chilena</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Mrs+Saint+Delafield&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/styles.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+<div id="app-header"></div>
+
+<main class="page" style="max-width: 800px; margin: 40px auto; padding: 0 20px;">
+  <div class="section-head">
+    <div>
+      <h2 style="font-family: 'Work Sans', sans-serif; font-weight: 700; font-size: 28px; color: #333;">
+        <i class="fas fa-question-circle" style="color: #B93E35;"></i> Centro de Ayuda
+      </h2>
+      <p style="margin-top: 5px;">Soporte y documentación del sistema La Chilena.</p>
+    </div>
+  </div>
+
+  <div class="panel" style="background: var(--cream-2); border-color: var(--line);">
+    <h3 style="font-family: 'Work Sans', sans-serif; font-size: 18px;"><i class="fas fa-comments"></i> Preguntas Frecuentes</h3>
+
+    <div style="background: white; border: 1px solid var(--line); border-radius: 8px; padding: 15px; margin-bottom: 10px;">
+      <h4 style="font-weight: 600; margin: 0 0 5px 0;">¿Cómo anulo un pedido?</h4>
+      <p style="font-size: 13.5px; color: var(--ink-soft); margin: 0;">Dirígete a la sección "Mis pedidos", busca el pedido en estado "Pago pendiente" o "Pago confirmado" y haz clic en "Anular", indicando el motivo.</p>
+    </div>
+
+    <div style="background: white; border: 1px solid var(--line); border-radius: 8px; padding: 15px; margin-bottom: 10px;">
+      <h4 style="font-weight: 600; margin: 0 0 5px 0;">¿Cuál es el radio de despacho gratuito?</h4>
+      <p style="font-size: 13.5px; color: var(--ink-soft); margin: 0;">El despacho es gratuito dentro de un radio de 3 kilómetros a la redonda desde nuestro local en Maipú (comunas habilitadas: Maipú y Santiago).</p>
+    </div>
+
+    <div style="background: white; border: 1px solid var(--line); border-radius: 8px; padding: 15px;">
+      <h4 style="font-weight: 600; margin: 0 0 5px 0;">¿Dónde descargo mi boleta electrónica?</h4>
+      <p style="font-size: 13.5px; color: var(--ink-soft); margin: 0;">Una vez confirmado el pago por el cajero virtual, la boleta se envía automáticamente a tu correo electrónico y queda disponible en "Mis pedidos" → "Ver boleta".</p>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h3 style="font-family: 'Work Sans', sans-serif; font-size: 18px;"><i class="fas fa-book"></i> Manuales de Usuario</h3>
+    <p style="font-size: 13.5px; color: var(--ink-soft); margin-bottom: 20px;">Documentación estructurada según su perfil en el sistema.</p>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
+      <div style="border: 1px solid var(--line); border-radius: 8px; padding: 15px; display: flex; align-items: center; gap: 15px; cursor: pointer; transition: 0.2s;" onmouseover="this.style.borderColor='#B93E35'" onmouseout="this.style.borderColor='var(--line)'" onclick="openManual('cliente')">
+        <i class="fas fa-file-pdf text-3xl" style="color: #B93E35; font-size: 24px;"></i>
+        <div>
+          <h4 style="margin: 0; font-weight: 600; font-size: 14.5px;">Manual del Cliente</h4>
+          <p style="margin: 0; font-size: 12px; color: var(--ink-soft);">Registro, compras, seguimiento y boletas</p>
+        </div>
+      </div>
+
+      <div style="border: 1px solid var(--line); border-radius: 8px; padding: 15px; display: flex; align-items: center; gap: 15px; cursor: pointer; transition: 0.2s;" onmouseover="this.style.borderColor='#B93E35'" onmouseout="this.style.borderColor='var(--line)'" onclick="openManual('staff')">
+        <i class="fas fa-file-pdf text-3xl" style="color: #B93E35; font-size: 24px;"></i>
+        <div>
+          <h4 style="margin: 0; font-weight: 600; font-size: 14.5px;">Manual de Operación y Administración</h4>
+          <p style="margin: 0; font-size: 12px; color: var(--ink-soft);">Caja, despacho, mantenedores y reportes</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div id="manualModal" class="win-modal-overlay">
+  <div class="win-modal" style="width: 540px;">
+    <div class="win-modal-header">
+      <span id="manualTitle">Manual de Usuario</span>
+      <button type="button" class="win-modal-close" onclick="document.getElementById('manualModal').style.display='none'">&times;</button>
+    </div>
+    <div class="win-modal-body" id="manualBody" style="font-size: 13.5px; line-height: 1.55;"></div>
+    <div class="win-modal-footer">
+      <button type="button" class="win-btn win-btn-primary" onclick="document.getElementById('manualModal').style.display='none'">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<footer class="site-footer" style="padding-bottom: 40px; border-top: 1px solid var(--line); margin-top: 40px;">
+  La Chilena · Sistema de Gestión y Ventas<br>
+  <a href="ayuda.html" class="footer-link">Centro de Ayuda y Manuales</a>
+</footer>
+<div id="app-tabbar"></div>
+
+<script src="assets/js/api.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/auth.js"></script>
+<script>
+function openManual(kind) {
+  const title = document.getElementById('manualTitle');
+  const body = document.getElementById('manualBody');
+  if (kind === 'cliente') {
+    title.textContent = 'Manual del Cliente — La Chilena';
+    body.innerHTML = `
+      <ol style="padding-left:18px; margin:0;">
+        <li style="margin-bottom:8px;"><strong>Registro y verificación de correo:</strong> En "Crear cuenta", completa tu RUN, dirección, comuna y teléfono. Haz clic en "Validar" para comprobar que tu correo está activo antes de enviar el formulario.</li>
+        <li style="margin-bottom:8px;"><strong>Catálogo y ofertas:</strong> Explora el menú por categoría o filtra por "Ofertas". Al iniciar sesión verás aplicados automáticamente los descuentos exclusivos para clientes registrados.</li>
+        <li style="margin-bottom:8px;"><strong>Carrito y pago:</strong> Revisa el resumen en "Carrito", selecciona Servipag o Depósito bancario y confirma. Recibirás las instrucciones o el código de pago de 6 dígitos.</li>
+        <li><strong>Seguimiento, boleta y anulación:</strong> En "Mis pedidos" puedes consultar el detalle en tiempo real, descargar tu boleta electrónica y anular pedidos mientras estén pendientes de pago o recién pagados.</li>
+        <li><strong>Mis datos:</strong> En "Mis pedidos" → "Mis datos" puedes actualizar tu nombre, dirección, comuna y teléfono. El RUN y el correo no se modifican, y los pedidos ya realizados conservan la dirección con la que se crearon.</li>
+      </ol>`;
+  } else {
+    title.textContent = 'Manual de Operación y Administración';
+    body.innerHTML = `
+      <ol style="padding-left:18px; margin:0;">
+        <li style="margin-bottom:8px;"><strong>Cajero virtual (Caja):</strong> Revisa los pedidos en estado "Pago pendiente", verifica el comprobante de depósito o el código aprobado por Servipag y confirma el pago para emitir y enviar la boleta electrónica. Los pedidos se muestran en orden de llegada, 20 por página; usa el buscador con el número de pedido (ORD-…) que te indique el cliente para encontrarlo de inmediato.</li>
+        <li style="margin-bottom:8px;"><strong>Encargado de despacho:</strong> Visualiza e imprime las órdenes pagadas por orden de llegada y avanza cada pedido por las etapas "En preparación", "Despachado" y "Entregado".</li>
+        <li style="margin-bottom:8px;"><strong>Administrador:</strong> Gestiona el catálogo de productos (crear, editar nombre, categoría, precio y descripción, cambiar disponibilidad o eliminar) y las promociones; registra y edita la ficha de los clientes, y administra las cuentas del personal: crear (el sistema envía una clave temporal de 24 horas por correo), editar nombre y perfil, reactivar o dar de baja. Si cambias el perfil de un colaborador o lo desactivas, sus sesiones abiertas se cierran.</li>
+        <li><strong>Dueño y Reportes:</strong> Consulta las métricas de ingresos, ticket promedio, unidades vendidas por producto y detalle de pedidos filtrando por rango de fechas.</li>
+      </ol>`;
+  }
+  document.getElementById('manualModal').style.display = 'flex';
+}
+
+(async function () {
+  await initSession(null, 'ayuda');
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>La Chilena</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Mrs+Saint+Delafield&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body>
+
+<div id="app-header"></div>
+
+<section class="hero">
+  <div class="hero-copy">
+    <span class="eyebrow-tag">Despacho gratis · radio de 3&nbsp;km</span>
+    <h2>Empanadas de siempre, pedidas como hoy.</h2>
+    <p>Recetas de campo, horneadas o fritas al momento. Arma tu pedido online y te las llevamos a la puerta.</p>
+    <div class="hero-actions">
+      <button class="btn btn-primary" onclick="document.getElementById('catRow').scrollIntoView({behavior:'smooth'})">Ver el menú</button>
+    </div>
+  </div>
+  <div class="hero-photo">
+    <img src="assets/img/hero.jpg" alt="Empanadas de pino recién horneadas sobre una tabla de madera">
+  </div>
+</section>
+
+<main class="page">
+  <div class="section-head">
+    <div>
+      <h2>Menú</h2>
+      <p>Elige tus favoritas y arma tu pedido.</p>
+    </div>
+  </div>
+
+  <div class="cat-row" id="catRow"></div>
+  <div class="grid" id="productGrid"></div>
+</main>
+
+<footer class="site-footer">
+  La Chilena · Empanadas artesanales<br>
+  <a href="ayuda.html" class="footer-link">Centro de Ayuda y Manuales</a>
+</footer>
+<div id="app-tabbar"></div>
+
+<script src="assets/js/api.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/auth.js"></script>
+<script>
+let activeCat = 'todas';
+let catalogProducts = [];
+
+const CATS = [
+  { id: 'todas', label: 'Todas' },
+  { id: 'oferta', label: 'Ofertas' },
+  { id: 'horno', label: 'Empanadas de horno' },
+  { id: 'frita', label: 'Empanadas fritas' },
+  { id: 'bebida', label: 'Bebidas' },
+];
+
+function renderCats() {
+  const row = document.getElementById('catRow');
+  row.innerHTML = CATS.map(c => `<button class="cat-chip ${c.id === activeCat ? 'active' : ''}" data-cat="${c.id}">${c.label}</button>`).join('');
+  row.querySelectorAll('.cat-chip').forEach(btn => {
+    btn.addEventListener('click', () => {
+      activeCat = btn.dataset.cat;
+      renderCats();
+      loadProducts();
+    });
+  });
+}
+
+async function loadProducts() {
+  const grid = document.getElementById('productGrid');
+  const query = {};
+  if (activeCat === 'oferta') query.onOffer = 'true';
+  else if (activeCat !== 'todas') query.category = activeCat;
+
+  try {
+    const res = await API.get('/products', Object.keys(query).length ? query : undefined);
+    catalogProducts = res.items || [];
+    renderProducts();
+  } catch (err) {
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><p>${esc(err.userMessage || 'No se pudo cargar el catálogo.')}</p></div>`;
+  }
+}
+
+function renderProducts() {
+  const grid = document.getElementById('productGrid');
+  if (!catalogProducts.length) {
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><p>No hay productos disponibles en esta categoría.</p></div>`;
+    return;
+  }
+  grid.innerHTML = catalogProducts.map(p => {
+    const hasPromo = p.promotion && p.finalPrice < p.price;
+    const priceHtml = hasPromo
+      ? `<span class="price"><s style="color:var(--ink-soft); font-size:13px; font-weight:400; margin-right:6px;">${fmtCLP(p.price)}</s>${fmtCLP(p.finalPrice)}</span>`
+      : `<span class="price">${fmtCLP(p.finalPrice || p.price)}</span>`;
+    const promoBadge = hasPromo
+      ? `<div style="font-size:11.5px; color:var(--maroon); font-weight:600;">🏷️ ${esc(p.promotion.name)} (-${p.promotion.discountPercent}%)</div>`
+      : '';
+    return `
+      <div class="card">
+        <div class="card-top">
+          <h3>${esc(p.name)}</h3>
+          ${priceHtml}
+        </div>
+        ${promoBadge}
+        <p class="desc">${esc(p.description)}</p>
+        <div class="card-foot">
+          <span class="stock-tag ${p.available ? '' : 'out'}">${p.available ? 'Disponible' : 'Agotado'}</span>
+          <button class="add-btn" ${p.available ? '' : 'disabled'} data-add="${esc(p.id)}">Agregar</button>
+        </div>
+      </div>`;
+  }).join('');
+
+  grid.querySelectorAll('[data-add]').forEach(btn => {
+    btn.addEventListener('click', () => addToCart(btn.dataset.add));
+  });
+}
+
+function addToCart(id) {
+  const session = getSession();
+  if (!session || session.role !== 'cliente') {
+    showToast('Inicia sesión como cliente para comprar');
+    setTimeout(() => { location.href = 'login.html?next=index.html'; }, 700);
+    return;
+  }
+  const cart = getCart(session.id);
+  cart[id] = Math.min(50, (cart[id] || 0) + 1);
+  saveCart(session.id, cart);
+  renderHeader('menu');
+  const p = catalogProducts.find(x => x.id === id);
+  showToast(`${p ? p.name : 'Producto'} agregado al carrito`);
+}
+
+(async function () {
+  await initSession(null, 'menu');
+  renderCats();
+  await loadProducts();
+})();
+</script>
+</body>
+</html>

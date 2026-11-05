@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Iniciar sesión — La Chilena</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Mrs+Saint+Delafield&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body>
+
+<div class="auth-shell">
+  <div class="auth-visual" style="background-image:url('assets/img/hero.jpg');">
+    <div>
+      <a href="index.html"><span class="logo-script">La chilena</span></a>
+      <div class="tagline-sm">EMPANADAS ARTESANALES</div>
+    </div>
+    <div>
+      <div class="quote">"El sabor clásico chileno en una mordida"</div>
+      <div class="quote-sub">Empanadas fritas y al horno, elaboradas artesanalmente, en la puerta de tu hogar.</div>
+    </div>
+  </div>
+
+  <div class="auth-form-wrap">
+    <div class="auth-card">
+      <h2>Iniciar sesión</h2>
+      <p class="sub">Accede a tu cuenta para realizar pedidos.</p>
+
+      <div id="error-box" class="mensaje-error">
+        <p class="titulo-error">Error en el formulario</p>
+        <p id="error-message" class="detalle-error"></p>
+      </div>
+
+      <form id="loginForm" novalidate>
+        <div class="field">
+          <label>Correo electrónico</label>
+          <input type="email" id="email" placeholder="ejemplo@gmail.com" required autocomplete="username">
+        </div>
+        <div class="field">
+          <label>Contraseña</label>
+          <input type="password" id="pass" placeholder="••••••••" required autocomplete="current-password">
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">Ingresar</button>
+      </form>
+
+      <div class="auth-divider">
+        ¿Eres cliente nuevo? <a href="registro.html">Regístrate aquí</a> · <a href="index.html">Ver menú</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="assets/js/api.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/auth.js"></script>
+<script>
+(async function () {
+  const user = await API.session();
+  if (user) {
+    if (user.mustChangePassword) {
+      openPasswordModal(true, () => {
+        location.href = ROLE_HOME[user.role] || 'index.html';
+      });
+    } else {
+      location.href = ROLE_HOME[user.role] || 'index.html';
+    }
+  }
+})();
+</script>
+</body>
+</html>

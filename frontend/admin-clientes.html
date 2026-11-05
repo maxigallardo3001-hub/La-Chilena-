@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clientes — Administración La Chilena</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Mrs+Saint+Delafield&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/styles.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+<div id="app-header"></div>
+
+<main class="page" style="max-width: 1000px; margin: 40px auto; padding: 0 20px;">
+  <div class="section-head">
+    <div>
+      <h2 style="font-family: 'Work Sans', sans-serif; font-weight: 700; font-size: 24px;">
+        <i class="fas fa-address-book" style="color: #B93E35;"></i> Clientes
+      </h2>
+      <p>Padrón y registro asistido de clientes</p>
+    </div>
+  </div>
+
+  <div class="win-toolbar">
+    <button class="win-btn win-btn-primary" onclick="openClientModal()">
+      <i class="fas fa-plus"></i> Registrar Cliente
+    </button>
+    <div style="flex-grow: 1;"></div>
+    <input type="search" id="search" placeholder="Buscar por nombre, RUN o correo…" style="padding: 4px 8px; border: 1px solid #ccc; border-radius: 3px; font-size: 13px; min-width: 250px;">
+  </div>
+
+  <div style="overflow-x: auto; background: white; border: 1px solid #d1d5db; border-top: none;">
+    <table class="win-datagrid">
+      <thead><tr><th>RUN</th><th>Nombre</th><th>Correo</th><th>Comuna</th><th>Teléfono</th><th>Acciones</th></tr></thead>
+      <tbody id="clientsBody"></tbody>
+    </table>
+  </div>
+</main>
+
+<div id="modal-cliente" class="win-modal-overlay">
+  <div class="win-modal" style="width: 480px;">
+    <div class="win-modal-header">
+      <span><i class="fas fa-user-plus"></i> Registrar cliente en local</span>
+      <button type="button" class="win-modal-close" onclick="document.getElementById('modal-cliente').style.display='none'"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="win-modal-body">
+      <form id="newClientForm">
+        <div style="display: flex; gap: 12px; margin-bottom: 10px;">
+          <div style="flex: 1;">
+            <label style="display: block; font-size: 13px; font-weight: bold; margin-bottom: 4px;">RUN</label>
+            <input type="text" id="ncRut" placeholder="12.345.678-5" style="width: 100%; border: 1px solid #ccc; padding: 6px; border-radius: 3px;" required>
+          </div>
+          <div style="flex: 2;">
+            <label style="display: block; font-size: 13px; font-weight: bold; margin-bottom: 4px;">Nombre completo</label>
+            <input type="text" id="ncName" style="width: 100%; border: 1px solid #ccc; padding: 6px; border-radius: 3px;" required>
+          </div>
+        </div>
+
+        <label style="display: block; font-size: 13px; font-weight: bold; margin-bottom: 4px;">Dirección</label>
+        <input type="text" id="ncAddress" placeholder="Av. Pajaritos 3450" style="width: 100%; border: 1px solid #ccc; padding: 6px; margin-bottom: 10px; border-radius: 3px;" required>
+
+        <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+          <div style="flex: 1;">
+            <label style="display: block; font-size: 13px; font-weight: bold; margin-bottom: 4px;">Comuna</label>
+            <select id="ncComuna" style="width: 100%; border: 1px solid #ccc; padding: 6px; border-radius: 3px;" required>
+              <option value="Maipú">Maipú</option>
+              <option value="Santiago">Santiago</option>
+              <option value="Ñuñoa">Ñuñoa</option>
+              <option value="Providencia">Providencia</option>
+              <option value="La Florida">La Florida</option>
+              <option value="Puente Alto">Puente Alto</option>
+            </select>
+          </div>
+          <div style="flex: 1;">
+            <label style="display: block; font-size: 13px; font-weight: bold; margin-bottom: 4px;">Provincia</label>
+            <select id="ncProvincia" style="width: 100%; border: 1px solid #ccc; padding: 6px; border-radius: 3px;" required>
+              <option value="Santiago">Santiago</option>
+              <option value="Cordillera">Cordillera</option>
+              <option value="Maipo">Maipo</option>
+            </select>
+          </div>
+          <div style="flex: 1;">
+            <label style="display: block; font-size: 13px; font-weight: bold; margin-bottom: 4px;">Región</label>
+            <select id="ncRegion" style="width: 100%; border: 1px solid #ccc; padding: 6px; border-radius: 3px;" required>
+              <option value="Metropolitana">Metropolitana</option>
+              <option value="Valparaíso">Valparaíso</option>
+              <option value="Biobío">Biobío</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+          <div style="flex: 1;">
+            <label style="display: block; font-size: 13px; font-weight: bold; margin-bottom: 4px;">Fecha nacimiento</label>
+            <input type="date" id="ncBirth" value="1995-05-15" style="width: 100%; border: 1px solid #ccc; padding: 6px; border-radius: 3px;" required>
+          </div>
+          <div style="flex: 1;">
+            <label style="display: block; font-size: 13px; font-weight: bold; margin-bottom: 4px;">Sexo</label>
+            <select id="ncSex" style="width: 100%; border: 1px solid #ccc; padding: 6px; border-radius: 3px;" required>
+              <option value="F">Femenino</option>
+              <option value="M">Masculino</option>
+              <option value="O">Prefiero no decir</option>
+            </select>
+          </div>
+          <div style="flex: 1;">
+            <label style="display: block; font-size: 13px; font-weight: bold; margin-bottom: 4px;">Teléfono</label>
+            <input type="tel" id="ncPhone" placeholder="+56912345678" pattern="^\+569\d{8}$" style="width: 100%; border: 1px solid #ccc; padding: 6px; border-radius: 3px;" required>
+          </div>
+        </div>
+
+        <label style="display: block; font-size: 13px; font-weight: bold; margin-bottom: 4px;">Correo electrónico</label>
+        <div style="display: flex; gap: 8px; margin-bottom: 4px;">
+          <input type="email" id="ncEmail" style="flex: 1; border: 1px solid #ccc; padding: 6px; border-radius: 3px;" required>
+          <button type="button" class="win-btn" id="ncVerifyBtn">Validar correo</button>
+        </div>
+        <div id="ncEmailHint" style="font-size: 12px; color: var(--ink-soft); margin-bottom: 8px;">
+          Se verificará la existencia del correo y se enviará una clave temporal al cliente.
+        </div>
+
+        <button type="submit" style="display: none;"></button>
+      </form>
+    </div>
+    <div class="win-modal-footer">
+      <button type="button" class="win-btn" onclick="document.getElementById('modal-cliente').style.display='none'">Cancelar</button>
+      <button type="button" class="win-btn win-btn-primary" onclick="document.getElementById('newClientForm').requestSubmit()">Registrar cliente</button>
+    </div>
+  </div>
+</div>
+
+<footer class="site-footer" style="padding-bottom: 40px;">
+  La Chilena · Sistema de Gestión y Ventas<br>
+  <a href="ayuda.html" class="footer-link">Centro de Ayuda y Manuales</a>
+</footer>
+<div id="app-tabbar"></div>
+
+<script src="assets/js/api.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/auth.js"></script>
+<script src="assets/js/profile.js"></script>
+<script>
+let adminVerificationId = null;
+
+async function loadClients(q) {
+  const body = document.getElementById('clientsBody');
+  try {
+    const res = await API.get('/clients', q ? { q } : undefined);
+    const list = res.items || [];
+    body.innerHTML = list.map(c => `
+      <tr>
+        <td>${esc(c.run)}</td>
+        <td>${esc(c.name)}</td>
+        <td>${esc(c.email)}</td>
+        <td>${esc(c.comuna || '—')}</td>
+        <td>${esc(c.phone || '—')}</td>
+        <td><button class="win-btn" data-edit-client="${esc(c.id)}"><i class="fas fa-pen"></i> Editar</button></td>
+      </tr>
+    `).join('') || `<tr><td colspan="6" style="color:var(--ink-soft); text-align: center;">Sin resultados.</td></tr>`;
+    body.querySelectorAll('[data-edit-client]').forEach(btn => {
+      btn.addEventListener('click', () => openClientProfile(btn.dataset.editClient,
+        () => loadClients(document.getElementById('search').value.trim())));
+    });
+  } catch (err) {
+    body.innerHTML = `<tr><td colspan="6" style="color:var(--maroon); text-align: center;">${esc(err.userMessage || 'No se pudieron consultar los clientes.')}</td></tr>`;
+  }
+}
+
+function openClientModal() {
+  adminVerificationId = null;
+  document.getElementById('newClientForm').reset();
+  const hint = document.getElementById('ncEmailHint');
+  hint.textContent = 'Se verificará la existencia del correo y se enviará una clave temporal al cliente.';
+  hint.style.color = 'var(--ink-soft)';
+  document.getElementById('modal-cliente').style.display = 'flex';
+}
+
+document.getElementById('ncEmail').addEventListener('input', () => {
+  adminVerificationId = null;
+  const hint = document.getElementById('ncEmailHint');
+  hint.textContent = 'Verifique el correo antes de registrar.';
+  hint.style.color = 'var(--ink-soft)';
+});
+
+document.getElementById('ncVerifyBtn').addEventListener('click', async () => {
+  const email = document.getElementById('ncEmail').value.trim();
+  const hint = document.getElementById('ncEmailHint');
+  if (!email || !email.includes('@')) {
+    hint.textContent = 'Ingrese un correo válido.';
+    hint.style.color = 'var(--maroon)';
+    return;
+  }
+  hint.textContent = 'Consultando servicio de validación…';
+  try {
+    const res = await API.post('/clients/email-verifications', { email });
+    if (res && res.valid) {
+      adminVerificationId = res.verificationId;
+      hint.textContent = '✓ Correo verificado y activo.';
+      hint.style.color = 'var(--herb)';
+    } else {
+      adminVerificationId = null;
+      hint.textContent = 'El correo no existe o no recibe mensajes.';
+      hint.style.color = 'var(--maroon)';
+    }
+  } catch (err) {
+    adminVerificationId = null;
+    hint.textContent = err.userMessage || 'Error al verificar el correo.';
+    hint.style.color = 'var(--maroon)';
+  }
+});
+
+document.getElementById('search').addEventListener('input', e => loadClients(e.target.value.trim()));
+
+document.getElementById('newClientForm').addEventListener('submit', async function (e) {
+  e.preventDefault();
+  const run = document.getElementById('ncRut').value.trim();
+  if (!validRun(run)) {
+    showToast('El RUN no es válido (formato 12.345.678-5).');
+    return;
+  }
+  const email = document.getElementById('ncEmail').value.trim();
+  if (!adminVerificationId) {
+    try {
+      const ver = await API.post('/clients/email-verifications', { email });
+      if (!ver || !ver.valid) {
+        showToast('El correo electrónico no es válido o no existe.');
+        return;
+      }
+      adminVerificationId = ver.verificationId;
+    } catch (err) {
+      showToast(err.userMessage || 'Debes validar el correo electrónico.');
+      return;
+    }
+  }
+
+  try {
+    await API.post('/clients', {
+      run,
+      name: document.getElementById('ncName').value.trim(),
+      address: document.getElementById('ncAddress').value.trim(),
+      comuna: document.getElementById('ncComuna').value,
+      provincia: document.getElementById('ncProvincia').value,
+      region: document.getElementById('ncRegion').value,
+      birthDate: document.getElementById('ncBirth').value,
+      sex: document.getElementById('ncSex').value,
+      email,
+      phone: document.getElementById('ncPhone').value.trim(),
+      verificationId: adminVerificationId,
+    });
+    document.getElementById('modal-cliente').style.display = 'none';
+    showToast('Cliente registrado. Se envió clave temporal a su correo.');
+    await loadClients(document.getElementById('search').value.trim());
+  } catch (err) {
+    showToast(err.userMessage || 'No se pudo registrar el cliente.');
+  }
+});
+
+(async function () {
+  const user = await initSession(['administrador'], 'clientes');
+  if (!user) return;
+  await loadClients('');
+})();
+</script>
+</body>
+</html>

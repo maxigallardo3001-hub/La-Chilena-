@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Usuarios — Administración La Chilena</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Mrs+Saint+Delafield&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/styles.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+<div id="app-header"></div>
+
+<main class="page" style="max-width: 1000px; margin: 40px auto; padding: 0 20px;">
+  <div class="section-head">
+    <div>
+      <h2 style="font-family: 'Work Sans', sans-serif; font-weight: 700; font-size: 24px;">
+        <i class="fas fa-users-cog" style="color: #B93E35;"></i> Usuarios del sistema
+      </h2>
+      <p>Asigna el perfil de cada colaborador</p>
+    </div>
+  </div>
+
+  <div class="win-toolbar">
+    <button class="win-btn win-btn-primary" onclick="document.getElementById('modal-usuario').style.display='flex'">
+      <i class="fas fa-plus"></i> Nuevo Usuario
+    </button>
+  </div>
+
+  <div style="overflow-x: auto; background: white; border: 1px solid #d1d5db; border-top: none;">
+    <table class="win-datagrid">
+      <thead><tr><th>Nombre</th><th>Correo</th><th>Perfil</th><th>Estado</th><th>Acciones</th></tr></thead>
+      <tbody id="usersBody"></tbody>
+    </table>
+  </div>
+</main>
+
+<div id="modal-usuario" class="win-modal-overlay">
+  <div class="win-modal">
+    <div class="win-modal-header">
+      <span><i class="fas fa-user-plus"></i> Agregar usuario</span>
+      <button type="button" class="win-modal-close" onclick="document.getElementById('modal-usuario').style.display='none'"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="win-modal-body">
+      <form id="newUserForm">
+        <label style="display: block; font-size: 13px; font-weight: bold; margin-bottom: 4px;">Nombre</label>
+        <input type="text" id="nuName" minlength="2" maxlength="80" style="width: 100%; border: 1px solid #ccc; padding: 6px; margin-bottom: 12px; border-radius: 3px;" required>
+
+        <label style="display: block; font-size: 13px; font-weight: bold; margin-bottom: 4px;">Correo</label>
+        <input type="email" id="nuEmail" style="width: 100%; border: 1px solid #ccc; padding: 6px; margin-bottom: 12px; border-radius: 3px;" required>
+
+        <label style="display: block; font-size: 13px; font-weight: bold; margin-bottom: 4px;">Perfil</label>
+        <select id="nuRole" style="width: 100%; border: 1px solid #ccc; padding: 6px; margin-bottom: 12px; border-radius: 3px;" required>
+          <option value="administrador">Administrador</option>
+          <option value="cajero">Cajero virtual</option>
+          <option value="despacho">Encargado de despacho</option>
+          <option value="dueno">Dueño</option>
+        </select>
+
+        <p style="font-size: 12px; color: var(--ink-soft); margin: 0;">
+          El sistema generará una clave temporal de un solo uso y la enviará por correo al colaborador.
+        </p>
+
+        <button type="submit" style="display: none;"></button>
+      </form>
+    </div>
+    <div class="win-modal-footer">
+      <button type="button" class="win-btn" onclick="document.getElementById('modal-usuario').style.display='none'">Cancelar</button>
+      <button type="button" class="win-btn win-btn-primary" onclick="document.getElementById('newUserForm').requestSubmit()">Crear usuario</button>
+    </div>
+  </div>
+</div>
+
+<div id="modal-editar-usuario" class="win-modal-overlay">
+  <div class="win-modal">
+    <div class="win-modal-header">
+      <span><i class="fas fa-user-pen"></i> Editar usuario</span>
+      <button type="button" class="win-modal-close" onclick="document.getElementById('modal-editar-usuario').style.display='none'"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="win-modal-body">
+      <form id="editUserForm">
+        <p id="euEmail" style="font-size: 13px; color: var(--ink-soft); margin: 0 0 12px;"></p>
+
+        <label style="display: block; font-size: 13px; font-weight: bold; margin-bottom: 4px;">Nombre</label>
+        <input type="text" id="euName" minlength="2" maxlength="80" style="width: 100%; border: 1px solid #ccc; padding: 6px; margin-bottom: 12px; border-radius: 3px;" required>
+
+        <label style="display: block; font-size: 13px; font-weight: bold; margin-bottom: 4px;">Perfil</label>
+        <select id="euRole" style="width: 100%; border: 1px solid #ccc; padding: 6px; margin-bottom: 12px; border-radius: 3px;" required>
+          <option value="administrador">Administrador</option>
+          <option value="cajero">Cajero virtual</option>
+          <option value="despacho">Encargado de despacho</option>
+          <option value="dueno">Dueño</option>
+        </select>
+
+        <label style="display: flex; align-items: center; gap: 8px; font-size: 13px;">
+          <input type="checkbox" id="euActive"> Cuenta activa
+        </label>
+        <p style="font-size: 12px; color: var(--ink-soft); margin: 8px 0 0;">
+          Si cambias el perfil o desactivas la cuenta, sus sesiones abiertas se cierran.
+        </p>
+
+        <button type="submit" style="display: none;"></button>
+      </form>
+    </div>
+    <div class="win-modal-footer">
+      <button type="button" class="win-btn" onclick="document.getElementById('modal-editar-usuario').style.display='none'">Cancelar</button>
+      <button type="button" class="win-btn win-btn-primary" onclick="document.getElementById('editUserForm').requestSubmit()">Guardar cambios</button>
+    </div>
+  </div>
+</div>
+
+<footer class="site-footer">
+  La Chilena · Empanadas artesanales<br>
+  <a href="ayuda.html" class="footer-link">Centro de Ayuda y Manuales</a>
+</footer>
+<div id="app-tabbar"></div>
+
+<script src="assets/js/api.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/auth.js"></script>
+<script>
+let currentAdmin = null;
+let staffUsers = [];
+let editingUserId = null;
+
+function openEditUser(user) {
+  editingUserId = user.id;
+  const self = currentAdmin && user.id === currentAdmin.id;
+  document.getElementById('euEmail').textContent = user.email;
+  document.getElementById('euName').value = user.name;
+  document.getElementById('euRole').value = user.role;
+  document.getElementById('euRole').disabled = self;
+  document.getElementById('euActive').checked = user.active;
+  document.getElementById('euActive').disabled = self;
+  document.getElementById('modal-editar-usuario').style.display = 'flex';
+}
+
+async function loadUsers() {
+  const body = document.getElementById('usersBody');
+  try {
+    staffUsers = (await API.get('/users')) || [];
+    body.innerHTML = staffUsers.map(u => {
+      const canDelete = u.active && (!currentAdmin || u.id !== currentAdmin.id);
+      return `
+        <tr>
+          <td>${esc(u.name)}</td>
+          <td>${esc(u.email)}</td>
+          <td><span class="role-tag">${esc(ROLE_LABEL[u.role] || u.role)}</span></td>
+          <td>${u.active ? '<span style="color:var(--herb); font-weight:600;">Activo</span>' : '<span style="color:var(--ink-soft);">Inactivo</span>'}</td>
+          <td style="white-space:nowrap;">
+            <button class="win-btn" data-edit="${esc(u.id)}"><i class="fas fa-pen"></i> Editar</button>
+            ${canDelete ? `<button class="win-btn" data-del="${esc(u.id)}"><i class="fas fa-trash" style="color:#B93E35;"></i> Dar de baja</button>` : ''}
+          </td>
+        </tr>`;
+    }).join('') || `<tr><td colspan="5" style="text-align:center; color:var(--ink-soft);">Sin usuarios.</td></tr>`;
+
+    body.querySelectorAll('[data-edit]').forEach(btn => {
+      btn.addEventListener('click', () => openEditUser(staffUsers.find(u => u.id === btn.dataset.edit)));
+    });
+
+    body.querySelectorAll('[data-del]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        try {
+          await API.delete(`/users/${encodeURIComponent(btn.dataset.del)}`);
+          showToast('Usuario dado de baja.');
+          await loadUsers();
+        } catch (err) {
+          showToast(err.userMessage || 'No se pudo dar de baja al usuario.');
+        }
+      });
+    });
+  } catch (err) {
+    body.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--maroon);">${esc(err.userMessage || 'No se pudieron cargar los usuarios.')}</td></tr>`;
+  }
+}
+
+document.getElementById('newUserForm').addEventListener('submit', async function (e) {
+  e.preventDefault();
+  try {
+    await API.post('/users', {
+      name: document.getElementById('nuName').value.trim(),
+      email: document.getElementById('nuEmail').value.trim(),
+      role: document.getElementById('nuRole').value,
+    });
+    this.reset();
+    document.getElementById('modal-usuario').style.display = 'none';
+    showToast('Usuario creado. Clave temporal enviada por correo.');
+    await loadUsers();
+  } catch (err) {
+    showToast(err.userMessage || 'No se pudo crear el usuario.');
+  }
+});
+
+document.getElementById('editUserForm').addEventListener('submit', async function (e) {
+  e.preventDefault();
+  try {
+    await API.put(`/users/${encodeURIComponent(editingUserId)}`, {
+      name: document.getElementById('euName').value.trim(),
+      role: document.getElementById('euRole').value,
+      active: document.getElementById('euActive').checked,
+    });
+    document.getElementById('modal-editar-usuario').style.display = 'none';
+    showToast('Usuario actualizado.');
+    await loadUsers();
+  } catch (err) {
+    showToast(err.userMessage || 'No se pudo actualizar el usuario.');
+  }
+});
+
+(async function () {
+  currentAdmin = await initSession(['administrador'], 'usuarios');
+  if (!currentAdmin) return;
+  await loadUsers();
+})();
+</script>
+</body>
+</html>

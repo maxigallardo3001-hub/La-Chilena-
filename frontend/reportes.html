@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reporte de ventas — La Chilena</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Mrs+Saint+Delafield&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/styles.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+<div id="app-header"></div>
+
+<main class="page" style="max-width: 1000px; margin: 40px auto; padding: 0 20px;">
+  <div class="section-head">
+    <div>
+      <h2 style="font-family: 'Work Sans', sans-serif; font-weight: 700; font-size: 24px;">
+        <i class="fas fa-chart-line" style="color: #B93E35;"></i> Reporte de ventas
+      </h2>
+      <p>Consulta consolidada por período</p>
+    </div>
+  </div>
+
+  <div class="win-toolbar" style="margin-bottom: 20px; border-radius: 4px; border-bottom: 1px solid #d1d5db; align-items: center;">
+    <label style="font-size: 13px; font-weight: bold;">Desde:</label>
+    <input type="date" id="fromDate" style="padding: 4px 8px; border: 1px solid #ccc; border-radius: 3px; font-size: 13px;">
+
+    <label style="font-size: 13px; font-weight: bold; margin-left: 15px;">Hasta:</label>
+    <input type="date" id="toDate" style="padding: 4px 8px; border: 1px solid #ccc; border-radius: 3px; font-size: 13px;">
+
+    <button class="win-btn win-btn-primary" style="margin-left: 15px;" onclick="loadReport()">
+      <i class="fas fa-search"></i> Consultar
+    </button>
+  </div>
+
+  <div class="kpi-row" id="kpis" style="margin-bottom: 30px; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));"></div>
+
+  <div class="panel" style="margin-bottom: 30px; border: 1px solid #d1d5db; box-shadow: none;">
+    <h3 style="font-family: 'Work Sans', sans-serif; font-size: 16px; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 15px;">Ventas por producto</h3>
+    <div id="byProduct"></div>
+  </div>
+
+  <div style="overflow-x: auto; background: white; border: 1px solid #d1d5db;">
+    <table class="win-datagrid">
+      <thead><tr><th>N° pedido</th><th>Fecha</th><th>Cliente</th><th>Estado</th><th>Total</th><th>Acciones</th></tr></thead>
+      <tbody id="salesBody"></tbody>
+    </table>
+  </div>
+</main>
+
+<footer class="site-footer">
+  La Chilena · Empanadas artesanales<br>
+  <a href="ayuda.html" class="footer-link">Centro de Ayuda y Manuales</a>
+</footer>
+<div id="app-tabbar"></div>
+
+<div id="cancelModal" class="win-modal-overlay">
+  <div style="background:var(--white); border-radius:14px; padding:22px; max-width:420px; width:100%;">
+    <h3 style="margin-bottom:8px;">Anular pedido</h3>
+    <p style="font-size:13.5px; color:var(--ink-soft); margin-bottom:12px;">Indica el motivo de la anulación.</p>
+    <select id="cancelReason" style="width:100%; padding:10px; border:1px solid var(--line); border-radius:8px; margin-bottom:14px;">
+      <option value="Solicitud del cliente">Solicitud del cliente</option>
+      <option value="Producto sin stock">Producto sin stock</option>
+      <option value="Error en el pedido">Error en el pedido</option>
+      <option value="Otro motivo">Otro motivo</option>
+    </select>
+    <div style="display:flex; gap:10px;">
+      <button class="btn btn-ghost btn-block" onclick="closeCancelModal()">Volver</button>
+      <button class="btn btn-primary btn-block" id="confirmCancelBtn" onclick="submitCancel()">Confirmar anulación</button>
+    </div>
+  </div>
+</div>
+
+<script src="assets/js/api.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/auth.js"></script>
+<script>
+let currentUser = null;
+let cancelTargetId = null;
+
+function setInitialDates() {
+  const now = new Date();
+  const to = now.toISOString().slice(0, 10);
+  const from = new Date(now.getTime() - 90 * 86400000).toISOString().slice(0, 10);
+  document.getElementById('fromDate').value = from;
+  document.getElementById('toDate').value = to;
+}
+
+async function loadReport() {
+  const from = document.getElementById('fromDate').value;
+  const to = document.getElementById('toDate').value;
+  const salesBody = document.getElementById('salesBody');
+
+  try {
+    const res = await API.get('/reports/sales', { from, to, size: 50 });
+    const kpis = res.kpis || { orders: 0, revenue: 0, averageTicket: 0, cancelled: 0 };
+
+    document.getElementById('kpis').innerHTML = `
+      <div class="kpi-card"><span>Ventas totales</span><strong>${fmtCLP(kpis.revenue)}</strong></div>
+      <div class="kpi-card"><span>Pedidos efectivos</span><strong>${kpis.orders}</strong></div>
+      <div class="kpi-card"><span>Ticket promedio</span><strong>${fmtCLP(kpis.averageTicket)}</strong></div>
+      <div class="kpi-card"><span>Pedidos anulados</span><strong>${kpis.cancelled}</strong></div>
+    `;
+
+    const byProduct = res.byProduct || [];
+    const maxVal = Math.max(1, ...byProduct.map(p => p.revenue));
+    document.getElementById('byProduct').innerHTML = byProduct.map(p => `
+      <div class="bar-row">
+        <span class="label" style="width:160px;">${esc(p.name)} (${p.units})</span>
+        <div class="bar-track"><div class="bar-fill" style="width:${(p.revenue / maxVal * 100).toFixed(0)}%"></div></div>
+        <span class="val" style="width:90px;">${fmtCLP(p.revenue)}</span>
+      </div>`).join('') || '<p style="color:var(--ink-soft); font-size:13.5px;">Sin ventas registradas en el período seleccionado.</p>';
+
+    const orders = res.orders || [];
+    const cancellable = ['pendiente_pago', 'pagado', 'en_preparacion', 'despachado'];
+    salesBody.innerHTML = orders.map(o => {
+      const st = statusInfo(o.status);
+      const canCancel = currentUser && currentUser.role === 'administrador' && cancellable.includes(o.status);
+      return `
+        <tr>
+          <td>${esc(o.id)}</td>
+          <td>${fmtDate(o.createdAt)}</td>
+          <td>${esc(o.clientName || 'Cliente')}</td>
+          <td><span class="badge ${st.cls}">${esc(st.label)}</span></td>
+          <td>${fmtCLP(o.total)}</td>
+          <td>${canCancel ? `<button class="win-btn" data-cancel="${esc(o.id)}">Anular</button>` : ''}</td>
+        </tr>`;
+    }).join('') || `<tr><td colspan="6" style="color:var(--ink-soft); text-align:center;">Sin pedidos en el período.</td></tr>`;
+
+    salesBody.querySelectorAll('[data-cancel]').forEach(btn => {
+      btn.addEventListener('click', () => openCancelModal(btn.dataset.cancel));
+    });
+  } catch (err) {
+    showToast(err.userMessage || 'Rango de fechas inválido o error al consultar.');
+  }
+}
+
+function openCancelModal(id) {
+  cancelTargetId = id;
+  document.getElementById('cancelModal').style.display = 'flex';
+}
+
+function closeCancelModal() {
+  cancelTargetId = null;
+  document.getElementById('cancelModal').style.display = 'none';
+}
+
+async function submitCancel() {
+  if (!cancelTargetId) return;
+  const btn = document.getElementById('confirmCancelBtn');
+  btn.disabled = true;
+  try {
+    const reason = document.getElementById('cancelReason').value;
+    await API.post(`/orders/${encodeURIComponent(cancelTargetId)}/cancellation`, { reason });
+    showToast('Pedido anulado.');
+    closeCancelModal();
+    await loadReport();
+  } catch (err) {
+    showToast(err.userMessage || 'No se pudo anular el pedido.');
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+(async function () {
+  currentUser = await initSession(['administrador', 'dueno'], 'reportes');
+  if (!currentUser) return;
+  setInitialDates();
+  await loadReport();
+})();
+</script>
+</body>
+</html>

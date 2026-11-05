@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Productos y Promociones — Administración La Chilena</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Mrs+Saint+Delafield&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/styles.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+<div id="app-header"></div>
+
+<main class="page" style="max-width: 1000px; margin: 40px auto; padding: 0 20px;">
+  <div class="section-head">
+    <div>
+      <h2 style="font-family: 'Work Sans', sans-serif; font-weight: 700; font-size: 24px;">
+        <i class="fas fa-box-open" style="color: #B93E35;"></i> Productos
+      </h2>
+      <p>Disponibilidad y precios del menú</p>
+    </div>
+  </div>
+
+  <div class="win-toolbar">
+    <button class="win-btn win-btn-primary" onclick="openProductModal()">
+      <i class="fas fa-plus"></i> Nuevo Producto
+    </button>
+    <div style="flex-grow: 1;"></div>
+    <input type="search" id="search" placeholder="Buscar producto…" style="padding: 4px 8px; border: 1px solid #ccc; border-radius: 3px; font-size: 13px; min-width: 200px;">
+  </div>
+
+  <div style="overflow-x: auto; background: white; border: 1px solid #d1d5db; border-top: none; margin-bottom: 36px;">
+    <table class="win-datagrid">
+      <thead>
+        <tr><th>Producto</th><th>Categoría</th><th>Precio</th><th>Disponible</th><th>Acciones</th></tr>
+      </thead>
+      <tbody id="productsBody"></tbody>
+    </table>
+  </div>
+
+  <div class="section-head" style="padding-top: 8px;">
+    <div>
+      <h2 style="font-family: 'Work Sans', sans-serif; font-weight: 700; font-size: 22px;">
+        <i class="fas fa-tags" style="color: #B93E35;"></i> Promociones y Ofertas
+      </h2>
+      <p>Descuentos vigentes para todo el público o exclusivos para clientes registrados</p>
+    </div>
+  </div>
+
+  <div class="win-toolbar">
+    <button class="win-btn win-btn-primary" onclick="openPromoModal()">
+      <i class="fas fa-plus"></i> Nueva Promoción
+    </button>
+    <div style="flex-grow: 1;"></div>
+    <input type="search" id="searchPromo" placeholder="Buscar promoción…" style="padding: 4px 8px; border: 1px solid #ccc; border-radius: 3px; font-size: 13px; min-width: 200px;">
+  </div>
+
+  <div style="overflow-x: auto; background: white; border: 1px solid #d1d5db; border-top: none;">
+    <table class="win-datagrid">
+      <thead>
+        <tr><th>Promoción</th><th>Producto</th><th>Descuento</th><th>Público</th><th>Vigencia</th><th>Activa</th><th>Acciones</th></tr>
+      </thead>
+      <tbody id="promosBody"></tbody>
+    </table>
+  </div>
+</main>
+
+<div id="modal-producto" class="win-modal-overlay">
+  <div class="win-modal">
+    <div class="win-modal-header">
+      <span id="productModalTitle"><i class="fas fa-plus"></i> Agregar producto</span>
+      <button type="button" class="win-modal-close" onclick="document.getElementById('modal-producto').style.display='none'"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="win-modal-body">
+      <form id="newProductForm">
+        <label style="display: block; font-size: 13px; font-weight: bold; margin-bottom: 4px;">Nombre</label>
+        <input type="text" id="npName" minlength="2" maxlength="80" style="width: 100%; border: 1px solid #ccc; padding: 6px; margin-bottom: 12px; border-radius: 3px;" required>
+
+        <div style="display: flex; gap: 12px; margin-bottom: 12px;">
+          <div style="flex: 1;">
+            <label style="display: block; font-size: 13px; font-weight: bold; margin-bottom: 4px;">Categoría</label>
+            <select id="npCat" style="width: 100%; border: 1px solid #ccc; padding: 6px; border-radius: 3px;" required>
+              <option value="horno">Empanada de horno</option>
+              <option value="frita">Empanada frita</option>
+              <option value="bebida">Bebida</option>
+            </select>
+          </div>
+          <div style="flex: 1;">
+            <label style="display: block; font-size: 13px; font-weight: bold; margin-bottom: 4px;">Precio (CLP)</label>
+            <input type="number" id="npPrice" min="1" max="1000000" step="1" style="width: 100%; border: 1px solid #ccc; padding: 6px; border-radius: 3px;" required>
+          </div>
+        </div>
+
+        <label style="display: block; font-size: 13px; font-weight: bold; margin-bottom: 4px;">Descripción</label>
+        <input type="text" id="npDesc" maxlength="200" placeholder="Ingredientes / preparación" style="width: 100%; border: 1px solid #ccc; padding: 6px; border-radius: 3px;">
+
+        <button type="submit" style="display: none;"></button>
+      </form>
+    </div>
+    <div class="win-modal-footer">
+      <button type="button" class="win-btn" onclick="document.getElementById('modal-producto').style.display='none'">Cancelar</button>
+      <button type="button" class="win-btn win-btn-primary" id="productSubmitBtn" onclick="document.getElementById('newProductForm').requestSubmit()">Agregar al menú</button>
+    </div>
+  </div>
+</div>
+
+<div id="modal-promo" class="win-modal-overlay">
+  <div class="win-modal" style="width: 440px;">
+    <div class="win-modal-header">
+      <span><i class="fas fa-tags"></i> Nueva promoción</span>
+      <button type="button" class="win-modal-close" onclick="document.getElementById('modal-promo').style.display='none'"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="win-modal-body">
+      <form id="newPromoForm">
+        <label style="display: block; font-size: 13px; font-weight: bold; margin-bottom: 4px;">Nombre de la promoción</label>
+        <input type="text" id="prName" minlength="2" maxlength="80" placeholder="Ej. 15% en empanadas de pino" style="width: 100%; border: 1px solid #ccc; padding: 6px; margin-bottom: 12px; border-radius: 3px;" required>
+
+        <label style="display: block; font-size: 13px; font-weight: bold; margin-bottom: 4px;">Producto</label>
+        <select id="prProduct" style="width: 100%; border: 1px solid #ccc; padding: 6px; margin-bottom: 12px; border-radius: 3px;" required></select>
+
+        <div style="display: flex; gap: 12px; margin-bottom: 12px;">
+          <div style="flex: 1;">
+            <label style="display: block; font-size: 13px; font-weight: bold; margin-bottom: 4px;">Descuento (%)</label>
+            <input type="number" id="prDiscount" min="1" max="90" value="10" style="width: 100%; border: 1px solid #ccc; padding: 6px; border-radius: 3px;" required>
+          </div>
+          <div style="flex: 1;">
+            <label style="display: block; font-size: 13px; font-weight: bold; margin-bottom: 4px;">Audiencia</label>
+            <select id="prAudience" style="width: 100%; border: 1px solid #ccc; padding: 6px; border-radius: 3px;" required>
+              <option value="todos">Todos los visitantes</option>
+              <option value="registrados">Solo clientes registrados</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 12px; margin-bottom: 12px;">
+          <div style="flex: 1;">
+            <label style="display: block; font-size: 13px; font-weight: bold; margin-bottom: 4px;">Desde</label>
+            <input type="date" id="prStarts" style="width: 100%; border: 1px solid #ccc; padding: 6px; border-radius: 3px;" required>
+          </div>
+          <div style="flex: 1;">
+            <label style="display: block; font-size: 13px; font-weight: bold; margin-bottom: 4px;">Hasta</label>
+            <input type="date" id="prEnds" style="width: 100%; border: 1px solid #ccc; padding: 6px; border-radius: 3px;" required>
+          </div>
+        </div>
+
+        <label style="display: block; font-size: 13px; font-weight: bold; margin-bottom: 4px;">Descripción</label>
+        <input type="text" id="prDesc" maxlength="200" style="width: 100%; border: 1px solid #ccc; padding: 6px; border-radius: 3px;">
+
+        <button type="submit" style="display: none;"></button>
+      </form>
+    </div>
+    <div class="win-modal-footer">
+      <button type="button" class="win-btn" onclick="document.getElementById('modal-promo').style.display='none'">Cancelar</button>
+      <button type="button" class="win-btn win-btn-primary" onclick="document.getElementById('newPromoForm').requestSubmit()">Crear promoción</button>
+    </div>
+  </div>
+</div>
+
+<footer class="site-footer">
+  La Chilena · Empanadas artesanales<br>
+  <a href="ayuda.html" class="footer-link">Centro de Ayuda y Manuales</a>
+</footer>
+<div id="app-tabbar"></div>
+
+<script src="assets/js/api.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/auth.js"></script>
+<script>
+let allProducts = [];
+let editingProductId = null;
+
+function openProductModal(product) {
+  const form = document.getElementById('newProductForm');
+  form.reset();
+  editingProductId = product ? product.id : null;
+  document.getElementById('productModalTitle').innerHTML = product
+    ? '<i class="fas fa-pen"></i> Editar producto'
+    : '<i class="fas fa-plus"></i> Agregar producto';
+  document.getElementById('productSubmitBtn').textContent = product ? 'Guardar cambios' : 'Agregar al menú';
+  if (product) {
+    document.getElementById('npName').value = product.name;
+    document.getElementById('npCat').value = product.category;
+    document.getElementById('npPrice').value = product.price;
+    document.getElementById('npDesc').value = product.description || '';
+  }
+  document.getElementById('modal-producto').style.display = 'flex';
+}
+
+async function loadAdminProducts(q) {
+  const body = document.getElementById('productsBody');
+  try {
+    const res = await API.get('/admin/products', q ? { q } : undefined);
+    allProducts = res.items || [];
+    renderProducts();
+  } catch (err) {
+    body.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--maroon);">${esc(err.userMessage || 'No se pudieron cargar los productos.')}</td></tr>`;
+  }
+}
+
+function renderProducts() {
+  const body = document.getElementById('productsBody');
+  if (!allProducts.length) {
+    body.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--ink-soft);">Sin productos.</td></tr>`;
+    return;
+  }
+  body.innerHTML = allProducts.map(p => `
+    <tr>
+      <td><strong>${esc(p.name)}</strong><br><span style="color:var(--ink-soft); font-size:12px;">${esc(p.description || '')}</span></td>
+      <td>${esc(CAT_LABEL[p.category] || p.category)}</td>
+      <td>${fmtCLP(p.price)}</td>
+      <td>
+        <label class="switch">
+          <input type="checkbox" ${p.available ? 'checked' : ''} data-toggle="${esc(p.id)}">
+          <span class="slider"></span>
+        </label>
+      </td>
+      <td style="white-space:nowrap;">
+        <button class="win-btn" data-edit="${esc(p.id)}"><i class="fas fa-pen"></i> Editar</button>
+        <button class="win-btn" data-del="${esc(p.id)}"><i class="fas fa-trash" style="color:#B93E35;"></i> Eliminar</button>
+      </td>
+    </tr>
+  `).join('');
+
+  body.querySelectorAll('[data-toggle]').forEach(cb => {
+    cb.addEventListener('change', async () => {
+      const id = cb.dataset.toggle;
+      try {
+        await API.put(`/admin/products/${encodeURIComponent(id)}/availability`, { available: cb.checked });
+        const prod = allProducts.find(x => x.id === id);
+        if (prod) prod.available = cb.checked;
+        showToast(`${prod ? prod.name : 'Producto'}: ${cb.checked ? 'disponible' : 'agotado'}`);
+      } catch (err) {
+        cb.checked = !cb.checked;
+        showToast(err.userMessage || 'No se pudo cambiar la disponibilidad.');
+      }
+    });
+  });
+
+  body.querySelectorAll('[data-edit]').forEach(btn => {
+    btn.addEventListener('click', () => openProductModal(allProducts.find(x => x.id === btn.dataset.edit)));
+  });
+
+  body.querySelectorAll('[data-del]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const id = btn.dataset.del;
+      try {
+        await API.delete(`/admin/products/${encodeURIComponent(id)}`);
+        showToast('Producto eliminado del menú.');
+        await loadAdminProducts(document.getElementById('search').value.trim());
+        await loadPromotions(document.getElementById('searchPromo').value.trim());
+      } catch (err) {
+        showToast(err.userMessage || 'No se pudo eliminar el producto.');
+      }
+    });
+  });
+}
+
+async function loadPromotions(q) {
+  const body = document.getElementById('promosBody');
+  try {
+    const res = await API.get('/admin/promotions', q ? { q } : undefined);
+    const items = res.items || [];
+    if (!items.length) {
+      body.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--ink-soft);">Sin promociones registradas.</td></tr>`;
+      return;
+    }
+    body.innerHTML = items.map(pr => `
+      <tr>
+        <td><strong>${esc(pr.name)}</strong><br><span style="color:var(--ink-soft); font-size:12px;">${esc(pr.description || '')}</span></td>
+        <td>${esc(pr.productName)}</td>
+        <td>${pr.discountPercent}%</td>
+        <td>${pr.audience === 'registrados' ? 'Clientes registrados' : 'Todos'}</td>
+        <td style="font-size:12.5px;">${esc(pr.startsAt)} a ${esc(pr.endsAt)}</td>
+        <td>
+          <label class="switch">
+            <input type="checkbox" ${pr.active ? 'checked' : ''} data-promo-toggle="${esc(pr.id)}">
+            <span class="slider"></span>
+          </label>
+        </td>
+        <td><button class="win-btn" data-promo-del="${esc(pr.id)}"><i class="fas fa-trash" style="color:#B93E35;"></i> Eliminar</button></td>
+      </tr>`).join('');
+
+    body.querySelectorAll('[data-promo-toggle]').forEach(cb => {
+      cb.addEventListener('change', async () => {
+        try {
+          await API.put(`/admin/promotions/${encodeURIComponent(cb.dataset.promoToggle)}/active`, { active: cb.checked });
+          showToast(`Promoción ${cb.checked ? 'activada' : 'desactivada'}.`);
+        } catch (err) {
+          cb.checked = !cb.checked;
+          showToast(err.userMessage || 'No se pudo actualizar la promoción.');
+        }
+      });
+    });
+
+    body.querySelectorAll('[data-promo-del]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        try {
+          await API.delete(`/admin/promotions/${encodeURIComponent(btn.dataset.promoDel)}`);
+          showToast('Promoción eliminada.');
+          await loadPromotions(document.getElementById('searchPromo').value.trim());
+        } catch (err) {
+          showToast(err.userMessage || 'No se pudo eliminar la promoción.');
+        }
+      });
+    });
+  } catch (err) {
+    body.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--maroon);">${esc(err.userMessage || 'No se pudieron cargar las promociones.')}</td></tr>`;
+  }
+}
+
+function openPromoModal() {
+  const select = document.getElementById('prProduct');
+  select.innerHTML = allProducts.map(p => `<option value="${esc(p.id)}">${esc(p.name)} (${fmtCLP(p.price)})</option>`).join('');
+  const today = new Date().toISOString().slice(0, 10);
+  const nextMonth = new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10);
+  document.getElementById('prStarts').value = today;
+  document.getElementById('prEnds').value = nextMonth;
+  document.getElementById('modal-promo').style.display = 'flex';
+}
+
+document.getElementById('search').addEventListener('input', e => loadAdminProducts(e.target.value.trim()));
+document.getElementById('searchPromo').addEventListener('input', e => loadPromotions(e.target.value.trim()));
+
+document.getElementById('newProductForm').addEventListener('submit', async function (e) {
+  e.preventDefault();
+  const payload = {
+    name: document.getElementById('npName').value.trim(),
+    category: document.getElementById('npCat').value,
+    price: Number(document.getElementById('npPrice').value),
+    description: document.getElementById('npDesc').value.trim() || 'Sin descripción.',
+  };
+  try {
+    if (editingProductId) {
+      await API.put(`/admin/products/${encodeURIComponent(editingProductId)}`, payload);
+      showToast('Producto actualizado.');
+    } else {
+      await API.post('/admin/products', payload);
+      showToast('Producto agregado al menú.');
+    }
+    this.reset();
+    editingProductId = null;
+    document.getElementById('modal-producto').style.display = 'none';
+    await loadAdminProducts(document.getElementById('search').value.trim());
+  } catch (err) {
+    showToast(err.userMessage || 'No se pudo guardar el producto.');
+  }
+});
+
+document.getElementById('newPromoForm').addEventListener('submit', async function (e) {
+  e.preventDefault();
+  try {
+    await API.post('/admin/promotions', {
+      name: document.getElementById('prName').value.trim(),
+      productId: document.getElementById('prProduct').value,
+      discountPercent: Number(document.getElementById('prDiscount').value),
+      audience: document.getElementById('prAudience').value,
+      startsAt: document.getElementById('prStarts').value,
+      endsAt: document.getElementById('prEnds').value,
+      description: document.getElementById('prDesc').value.trim(),
+    });
+    this.reset();
+    document.getElementById('modal-promo').style.display = 'none';
+    showToast('Promoción creada.');
+    await loadPromotions(document.getElementById('searchPromo').value.trim());
+  } catch (err) {
+    showToast(err.userMessage || 'No se pudo crear la promoción.');
+  }
+});
+
+(async function () {
+  const user = await initSession(['administrador', 'dueno'], 'productos');
+  if (!user) return;
+  await loadAdminProducts('');
+  await loadPromotions('');
+})();
+</script>
+</body>
+</html>

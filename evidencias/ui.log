@@ -1,0 +1,17 @@
+﻿PASS P01 visitante ve el catálogo sin sesión
+PASS P05 sin sesión, mis pedidos redirige al ingreso
+PASS P04 cliente arma el carrito y confirma el pedido (precio del servidor con promoción)
+PASS P05 mis pedidos combina orders, inventory y payments vía GraphQL
+PASS S32/S33 el cliente consulta y modifica sus datos desde Mis datos
+PASS un cliente no puede usar el mantenedor de productos
+PASS P09 el cajero busca el pedido, confirma el pago y ve la boleta con IVA
+PASS S19 la bandeja de ventas pagina los pedidos pendientes
+PASS P10 despacho ve la dirección y avanza el pedido a preparación
+PASS S30 el administrador edita un producto desde el mantenedor
+PASS S31 el administrador abre y guarda la edición de un usuario
+PASS S32 el administrador abre la ficha de un cliente
+PASS P11 el administrador consulta el reporte de ventas
+PASS P11 el dueño consulta el reporte de ventas
+PASS diseño móvil sin desborde horizontal (catálogo y mis pedidos)
+
+Todas las comprobaciones pasaron

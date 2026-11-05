@@ -1,0 +1,15 @@
+﻿Entorno: Linux-6.18.54.1-microsoft-standard-WSL2-x86_64-with-glibc2.41 · Python 3.12.16 · duración 60 s por escenario
+Preparando usuarios (registro por la API real)…
+
+Escenario                    Usuarios  Solicitudes   Req/s   p50 ms   p95 ms   p99 ms  Errores
+L1 catálogo, estrés (S10)          50        11811   196.3    208.1    555.5    805.4     0.0%
+L1b catálogo, 50 req/s (S10)       50         2998    49.2      6.7      9.8     12.7     0.0%
+L2 crear pedido (S15)              10         3536    58.8    158.2    247.0    325.5     0.0%
+L3 reporte de ventas (S24)          5         5567    92.7     50.7     79.5    100.9     0.0%
+L4 GraphQL misPedidos              20         6366   105.9    179.0    287.9    351.1     0.0%
+
+L1: p95 555 ms (objetivo < 200 ms), errores 0.0 % -> NO CUMPLE
+L1b: p95 10 ms (objetivo < 200 ms), errores 0.0 % -> CUMPLE
+L2: p95 247 ms (objetivo < 800 ms), errores 0.0 % -> CUMPLE
+L3: p95 79 ms (objetivo < 1000 ms), errores 0.0 % -> CUMPLE
+L4: p95 288 ms (objetivo < 600 ms), errores 0.0 % -> CUMPLE

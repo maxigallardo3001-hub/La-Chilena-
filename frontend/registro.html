@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Crear cuenta — La Chilena</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Mrs+Saint+Delafield&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/styles.css">
+<style>
+  .reg-shell{min-height:100vh; display:flex; flex-direction:column; align-items:center; padding:36px 16px 70px;}
+  .reg-head{text-align:center; margin-bottom:26px;}
+  .reg-head .logo-script{color:var(--maroon); font-size:34px;}
+  .reg-head p{color:var(--ink-soft); font-size:13.5px; margin-top:2px;}
+  .reg-card{width:100%; max-width:680px; background:var(--cream-2); border:1px solid var(--line); border-radius:16px; padding:30px 28px;}
+  .reg-card h2{font-size:20px; margin-bottom:20px;}
+</style>
+</head>
+<body>
+
+<div class="reg-shell">
+  <div class="reg-head">
+    <a href="index.html"><div class="logo-script">La chilena</div></a>
+    <p>Registro de cliente</p>
+  </div>
+
+  <div class="reg-card">
+    <h2>Crear cuenta</h2>
+
+    <div id="error-box" class="mensaje-error">
+      <p class="titulo-error">Error en el formulario</p>
+      <p id="error-message" class="detalle-error"></p>
+    </div>
+
+    <form id="regForm" novalidate>
+      <div class="field-row two">
+        <div class="field">
+          <label>Rut <span class="req">*</span></label>
+          <input type="text" id="rut" required pattern="^\d{1,2}\.\d{3}\.\d{3}-[0-9kK]{1}$" placeholder="12.345.678-5">
+        </div>
+        <div class="field">
+          <label>Nombre completo <span class="req">*</span></label>
+          <input type="text" id="name" placeholder="Nombre y apellido" required>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Dirección <span class="req">*</span></label>
+        <input type="text" id="address" placeholder="Av. Pajaritos 3450" required>
+      </div>
+
+      <div class="field-row three">
+        <div class="field">
+          <label>Comuna <span class="req">*</span></label>
+          <select id="comuna" required>
+            <option value="">Seleccionar…</option>
+            <option>Maipú</option><option>Santiago</option><option>Ñuñoa</option>
+            <option>Providencia</option><option>La Florida</option><option>Puente Alto</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Provincia <span class="req">*</span></label>
+          <select id="provincia" required>
+            <option value="">Seleccionar…</option>
+            <option>Santiago</option><option>Cordillera</option><option>Maipo</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Región <span class="req">*</span></label>
+          <select id="region" required>
+            <option value="">Seleccionar…</option>
+            <option>Metropolitana</option><option>Valparaíso</option><option>Biobío</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field-row two">
+        <div class="field">
+          <label>Fecha de nacimiento <span class="req">*</span></label>
+          <input type="date" id="birth" required>
+        </div>
+        <div class="field">
+          <label>Correo electrónico <span class="req">*</span></label>
+          <div class="field-inline">
+            <input type="email" id="email" placeholder="ejemplo@gmail.com" required>
+            <button type="button" class="btn btn-ghost btn-sm" id="validateBtn">Validar</button>
+          </div>
+          <div class="field-hint" id="emailHint">Verifique el correo electrónico.</div>
+        </div>
+      </div>
+
+      <div class="field-row two">
+        <div class="field">
+          <label>Sexo <span class="req">*</span></label>
+          <select id="sex" required>
+            <option value="">Seleccionar…</option>
+            <option value="F">Femenino</option><option value="M">Masculino</option><option value="O">Prefiero no decir</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Teléfono <span class="req">*</span></label>
+          <input type="tel" id="phone" required pattern="^\+569\d{8}$" placeholder="+56912345678">
+        </div>
+      </div>
+
+      <div class="field-row two">
+        <div class="field">
+          <label>Contraseña <span class="req">*</span></label>
+          <input type="password" id="pass" required minlength="8" placeholder="Mínimo 8 caracteres">
+        </div>
+        <div class="field">
+          <label>Confirmar contraseña <span class="req">*</span></label>
+          <input type="password" id="pass2" required minlength="8" placeholder="Mínimo 8 caracteres">
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-block">Crear cuenta</button>
+    </form>
+
+    <div class="auth-divider">
+      ¿Ya tienes una cuenta? <a href="login.html">Inicia sesión</a>
+    </div>
+  </div>
+</div>
+
+<script src="assets/js/api.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/auth.js"></script>
+<script>
+let verificationId = null;
+const regEmailInput = document.getElementById('email');
+
+regEmailInput.addEventListener('input', function () {
+  if (verificationId) {
+    verificationId = null;
+    const hint = document.getElementById('emailHint');
+    hint.textContent = 'Verifique el correo electrónico.';
+    hint.className = 'field-hint';
+  }
+});
+
+document.getElementById('validateBtn').addEventListener('click', async function () {
+  const email = regEmailInput.value.trim();
+  const hint = document.getElementById('emailHint');
+  if (!email || !email.includes('@')) {
+    hint.textContent = 'Ingresa un correo válido antes de validar.';
+    hint.className = 'field-hint err';
+    verificationId = null;
+    return;
+  }
+  hint.textContent = 'Consultando servicio de verificación de correo…';
+  hint.className = 'field-hint';
+  try {
+    const res = await API.post('/clients/email-verifications', { email });
+    if (res && res.valid) {
+      verificationId = res.verificationId;
+      hint.textContent = '✓ Correo verificado y activo.';
+      hint.className = 'field-hint ok';
+    } else {
+      verificationId = null;
+      hint.textContent = 'El correo no existe o no admite recepción de mensajes.';
+      hint.className = 'field-hint err';
+    }
+  } catch (err) {
+    verificationId = null;
+    hint.textContent = err.userMessage || 'No se pudo verificar el correo.';
+    hint.className = 'field-hint err';
+  }
+});
+
+document.getElementById('regForm').addEventListener('submit', async function (e) {
+  e.preventDefault();
+  const errorBox = document.getElementById('error-box');
+  const errorMessage = document.getElementById('error-message');
+  errorBox.style.display = 'none';
+
+  if (!this.checkValidity()) {
+    errorBox.style.display = 'block';
+    errorMessage.textContent = 'Verifica que todos los campos obligatorios tengan el formato correcto.';
+    return;
+  }
+
+  const run = document.getElementById('rut').value.trim();
+  if (!validRun(run)) {
+    errorBox.style.display = 'block';
+    errorMessage.textContent = 'El RUN ingresado no es válido (verifica el formato 12.345.678-5 y su dígito verificador).';
+    return;
+  }
+
+  const email = document.getElementById('email').value.trim();
+  const pass = document.getElementById('pass').value;
+  const pass2 = document.getElementById('pass2').value;
+
+  if (!verificationId) {
+    errorBox.style.display = 'block';
+    errorMessage.textContent = 'Debes validar el correo electrónico antes de crear la cuenta.';
+    return;
+  }
+  if (pass !== pass2) {
+    errorBox.style.display = 'block';
+    errorMessage.textContent = 'Las contraseñas no coinciden.';
+    return;
+  }
+
+  const submitBtn = this.querySelector('button[type="submit"]');
+  if (submitBtn) submitBtn.disabled = true;
+
+  try {
+    await API.post('/clients', {
+      run,
+      name: document.getElementById('name').value.trim(),
+      address: document.getElementById('address').value.trim(),
+      comuna: document.getElementById('comuna').value,
+      provincia: document.getElementById('provincia').value,
+      region: document.getElementById('region').value,
+      birthDate: document.getElementById('birth').value,
+      sex: document.getElementById('sex').value,
+      email,
+      phone: document.getElementById('phone').value.trim(),
+      password: pass,
+      verificationId,
+    });
+    await API.login(email, pass);
+    showToast('Cuenta creada. ¡Bienvenida/o a La Chilena!');
+    setTimeout(() => { location.href = 'index.html'; }, 500);
+  } catch (err) {
+    errorBox.style.display = 'block';
+    errorMessage.textContent = err.userMessage || err.message || 'No se pudo registrar la cuenta.';
+  } finally {
+    if (submitBtn) submitBtn.disabled = false;
+  }
+});
+</script>
+</body>
+</html>

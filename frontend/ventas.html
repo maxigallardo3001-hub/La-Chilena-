@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Realizar venta — Cajero virtual La Chilena</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Mrs+Saint+Delafield&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body>
+
+<div id="app-header"></div>
+
+<main class="page">
+  <div class="section-head">
+    <div>
+      <h2>Realizar venta</h2>
+      <p>Pedidos web pendientes de confirmación de pago y emisión de boleta</p>
+    </div>
+  </div>
+  <form id="orderSearch" style="display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap;">
+    <input type="search" id="orderSearchInput" placeholder="Buscar por número de pedido (ORD-…)" maxlength="64"
+      style="flex:1; min-width:220px; padding:8px 12px; border:1px solid var(--line); border-radius:8px; font-size:13.5px;">
+    <button type="submit" class="btn btn-ghost btn-sm">Buscar</button>
+  </form>
+  <div id="salesList"></div>
+  <div id="salesPager" class="no-print" style="display:flex; gap:12px; align-items:center; justify-content:center; margin-top:16px;"></div>
+</main>
+
+<div id="confirmPayModal" class="win-modal-overlay">
+  <div class="win-modal" style="width: 420px;">
+    <div class="win-modal-header">
+      <span id="confirmPayTitle">Confirmar pago</span>
+      <button type="button" class="win-modal-close" onclick="closeConfirmModal()">&times;</button>
+    </div>
+    <div class="win-modal-body">
+      <p id="confirmPayHint" style="font-size: 13.5px; color: var(--ink-soft); margin: 0 0 12px;"></p>
+      <form id="confirmPayForm">
+        <label style="display:block; font-size:13px; font-weight:bold; margin-bottom:4px;">Referencia o comprobante de pago</label>
+        <input type="text" id="payReference" minlength="3" maxlength="64" pattern="^[A-Za-z0-9_.-]+$" placeholder="Ej. DEP-102938 o código Servipag" style="width:100%; border:1px solid #ccc; padding:8px; border-radius:4px;" required>
+        <button type="submit" style="display:none;"></button>
+      </form>
+    </div>
+    <div class="win-modal-footer">
+      <button type="button" class="win-btn" onclick="closeConfirmModal()">Cancelar</button>
+      <button type="button" class="win-btn win-btn-primary" id="submitPayBtn" onclick="document.getElementById('confirmPayForm').requestSubmit()">Confirmar y emitir boleta</button>
+    </div>
+  </div>
+</div>
+
+<div id="receiptModal" class="win-modal-overlay">
+  <div class="win-modal" style="width:440px;">
+    <div class="win-modal-header">
+      <span id="receiptTitle">Boleta emitida</span>
+      <button type="button" class="win-modal-close" onclick="document.getElementById('receiptModal').style.display='none'">&times;</button>
+    </div>
+    <div class="win-modal-body" id="receiptBody" style="font-size:13.5px;"></div>
+    <div class="win-modal-footer">
+      <button type="button" class="win-btn win-btn-primary" onclick="document.getElementById('receiptModal').style.display='none'">Aceptar</button>
+    </div>
+  </div>
+</div>
+
+<footer class="site-footer">
+  La Chilena · Empanadas artesanales<br>
+  <a href="ayuda.html" class="footer-link">Centro de Ayuda y Manuales</a>
+</footer>
+<div id="app-tabbar"></div>
+
+<script src="assets/js/api.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/auth.js"></script>
+<script>
+const PAGE_SIZE = 20;
+let pendingOrders = [];
+let targetOrder = null;
+let currentPage = 1;
+
+async function loadSales(page) {
+  if (page) currentPage = page;
+  const el = document.getElementById('salesList');
+  try {
+    const res = await API.get('/orders', { status: 'pendiente_pago', page: currentPage, size: PAGE_SIZE });
+    if (!res.items.length && currentPage > 1 && res.total) return loadSales(Math.ceil(res.total / PAGE_SIZE));
+    pendingOrders = res.items || [];
+    renderSales();
+    renderPager(document.getElementById('salesPager'), currentPage, PAGE_SIZE, res.total, loadSales);
+  } catch (err) {
+    el.innerHTML = `<div class="empty-state"><p>${esc(err.userMessage || 'No se pudieron cargar los pedidos pendientes.')}</p></div>`;
+  }
+}
+
+function renderSales() {
+  const el = document.getElementById('salesList');
+  if (pendingOrders.length === 0) {
+    el.innerHTML = `<div class="empty-state"><div class="glyph">💳</div><p>No hay pedidos esperando confirmación de pago.</p></div>`;
+    return;
+  }
+  el.innerHTML = pendingOrders.map(o => {
+    const methodLabel = o.paymentMethod === 'servipag' ? 'Servipag' : 'Depósito bancario';
+    const itemsStr = (o.items || []).map(it => `${esc(it.name)} x${it.quantity}`).join(', ');
+    return `
+      <div class="order-card">
+        <div class="order-top">
+          <span class="order-id">${esc(o.id)} · ${esc(o.clientName || 'Cliente')}</span>
+          <span class="badge pending">Pago pendiente</span>
+        </div>
+        <div class="order-date">${fmtDate(o.createdAt)} · Medio: ${methodLabel} · ${fmtCLP(o.total)}</div>
+        <div class="order-foot">
+          <span>${itemsStr}</span>
+          <button class="btn btn-primary btn-sm" data-confirm="${esc(o.id)}">Confirmar pago y emitir boleta</button>
+        </div>
+      </div>`;
+  }).join('');
+
+  el.querySelectorAll('[data-confirm]').forEach(btn => {
+    btn.addEventListener('click', () => openConfirmModal(btn.dataset.confirm));
+  });
+}
+
+function openConfirmModal(orderId) {
+  targetOrder = pendingOrders.find(o => o.id === orderId);
+  if (!targetOrder) return;
+  document.getElementById('confirmPayTitle').textContent = `Confirmar pago — ${targetOrder.id}`;
+  const isServipag = targetOrder.paymentMethod === 'servipag';
+  document.getElementById('confirmPayHint').textContent = isServipag
+    ? `Pedido por ${fmtCLP(targetOrder.total)} vía Servipag. Ingresa el código de autorización de 6 dígitos verificado por el proveedor.`
+    : `Pedido por ${fmtCLP(targetOrder.total)} vía depósito bancario. Ingresa el número o referencia del comprobante.`;
+  const refInput = document.getElementById('payReference');
+  refInput.value = isServipag ? '' : 'DEP-' + targetOrder.id.slice(-4) + '-' + String(Date.now()).slice(-4);
+  document.getElementById('confirmPayModal').style.display = 'flex';
+}
+
+function closeConfirmModal() {
+  targetOrder = null;
+  document.getElementById('confirmPayModal').style.display = 'none';
+}
+
+document.getElementById('confirmPayForm').addEventListener('submit', async function (e) {
+  e.preventDefault();
+  if (!targetOrder) return;
+  const reference = document.getElementById('payReference').value.trim();
+  const btn = document.getElementById('submitPayBtn');
+  btn.disabled = true;
+  const orderId = targetOrder.id;
+
+  try {
+    const res = await API.post(`/payments/${encodeURIComponent(orderId)}/confirmation`, { reference });
+    closeConfirmModal();
+    showToast(`Pago confirmado y boleta ${res.receiptId} emitida.`);
+    await loadSales();
+    await showIssuedReceipt(orderId);
+  } catch (err) {
+    showToast(err.userMessage || 'No se pudo confirmar el pago.');
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+async function showIssuedReceipt(orderId) {
+  try {
+    const r = await API.get(`/orders/${encodeURIComponent(orderId)}/receipt`);
+    document.getElementById('receiptTitle').textContent = `Boleta ${r.receiptId}`;
+    const lines = (r.items || []).map(it => `
+      <div style="display:flex; justify-content:space-between; padding:4px 0;">
+        <span>${it.quantity} x ${esc(it.name)}</span>
+        <span>${fmtCLP(it.unitPrice * it.quantity)}</span>
+      </div>`).join('');
+    document.getElementById('receiptBody').innerHTML = `
+      <p style="margin:0 0 8px; color:var(--ink-soft);">Pedido: <strong>${esc(r.orderId)}</strong> · Emitida: ${fmtDate(r.issuedAt)}</p>
+      <div style="border-top:1px solid var(--line); border-bottom:1px solid var(--line); padding:8px 0; margin-bottom:10px;">
+        ${lines}
+      </div>
+      <div style="display:flex; justify-content:space-between; margin-bottom:4px;"><span>Monto Neto</span><span>${fmtCLP(r.net)}</span></div>
+      <div style="display:flex; justify-content:space-between; margin-bottom:6px;"><span>IVA (19%)</span><span>${fmtCLP(r.iva)}</span></div>
+      <div style="display:flex; justify-content:space-between; font-weight:700; font-size:15px;"><span>Total</span><span>${fmtCLP(r.total)}</span></div>
+      <p style="margin:10px 0 0; font-size:12px; color:var(--herb);">✓ Enviada automáticamente al correo del cliente.</p>`;
+    document.getElementById('receiptModal').style.display = 'flex';
+  } catch (_) {}
+}
+
+document.getElementById('orderSearchInput').addEventListener('input', (e) => {
+  if (!e.target.value.trim()) loadSales();
+});
+
+document.getElementById('orderSearch').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const orderId = document.getElementById('orderSearchInput').value.trim().toUpperCase();
+  if (!orderId) return loadSales(1);
+  try {
+    const order = await API.get(`/orders/${encodeURIComponent(orderId)}`);
+    pendingOrders = [order];
+    renderSales();
+    document.getElementById('salesPager').innerHTML = '';
+  } catch (err) {
+    showToast(err.status === 403 || err.status === 404
+      ? 'No hay un pedido pendiente de pago con ese número.'
+      : (err.userMessage || 'No se pudo buscar el pedido.'));
+  }
+});
+
+(async function () {
+  const user = await initSession(['cajero'], 'ventas');
+  if (!user) return;
+  await loadSales();
+})();
+</script>
+</body>
+</html>
