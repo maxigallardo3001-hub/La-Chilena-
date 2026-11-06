@@ -1,4 +1,4 @@
-FROM node:20-slim
+FROM node:22-slim
 WORKDIR /app
 COPY services/graphql/package.json services/graphql/package-lock.json ./
 RUN npm ci --omit=dev --no-audit --no-fund

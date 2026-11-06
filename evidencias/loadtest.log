@@ -2,14 +2,14 @@
 Preparando usuarios (registro por la API real)…
 
 Escenario                    Usuarios  Solicitudes   Req/s   p50 ms   p95 ms   p99 ms  Errores
-L1 catálogo, estrés (S10)          50        11811   196.3    208.1    555.5    805.4     0.0%
-L1b catálogo, 50 req/s (S10)       50         2998    49.2      6.7      9.8     12.7     0.0%
-L2 crear pedido (S15)              10         3536    58.8    158.2    247.0    325.5     0.0%
-L3 reporte de ventas (S24)          5         5567    92.7     50.7     79.5    100.9     0.0%
-L4 GraphQL misPedidos              20         6366   105.9    179.0    287.9    351.1     0.0%
+L1 catálogo, estrés (S10)          50        10112   168.0    243.3    671.4    978.1     0.0%
+L1b catálogo, 50 req/s (S10)       50         2998    49.2      8.1     12.2     16.5     0.0%
+L2 crear pedido (S15)              10         2666    44.3    212.2    307.1    417.3     0.0%
+L3 reporte de ventas (S24)          5         3919    65.3     71.1    115.0    146.2     0.0%
+L4 GraphQL misPedidos              20         6086   101.3    172.6    358.4    479.4     0.0%
 
-L1: p95 555 ms (objetivo < 200 ms), errores 0.0 % -> NO CUMPLE
-L1b: p95 10 ms (objetivo < 200 ms), errores 0.0 % -> CUMPLE
-L2: p95 247 ms (objetivo < 800 ms), errores 0.0 % -> CUMPLE
-L3: p95 79 ms (objetivo < 1000 ms), errores 0.0 % -> CUMPLE
-L4: p95 288 ms (objetivo < 600 ms), errores 0.0 % -> CUMPLE
+L1: p95 671 ms (objetivo < 200 ms), errores 0.0 % -> NO CUMPLE
+L1b: p95 12 ms (objetivo < 200 ms), errores 0.0 % -> CUMPLE
+L2: p95 307 ms (objetivo < 800 ms), errores 0.0 % -> CUMPLE
+L3: p95 115 ms (objetivo < 1000 ms), errores 0.0 % -> CUMPLE
+L4: p95 358 ms (objetivo < 600 ms), errores 0.0 % -> CUMPLE

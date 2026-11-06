@@ -9,8 +9,8 @@ Aplicación web responsiva y arquitectura backend distribuida para **La Chilena*
 - **Frontend:** `la-chilena-MGallardo`, versión 2.1 (integrada con API REST y GraphQL; agrega la edición de productos, usuarios y clientes, "Mis datos" del cliente y la paginación de caja y despacho).
 - **Stack tecnológico:**
   - **Frontend:** HTML5 semántico, CSS3 responsivo (diseño fluido con barra de navegación de escritorio, tabbar móvil e interfaz administrativa tipo DataGrid/Windows) y JavaScript ES2022 (`fetch` con cookies `HttpOnly` y cliente unificado en `assets/js/api.js`).
-  - **API Gateway y Microservicios Transaccionales:** Python 3.12 + FastAPI + Uvicorn sobre TLS interno (`gateway`, `auth`, `clients`, `inventory`, `orders`, `payments`, `notifications`, `servipag-sim`, `mailcheck-sim`).
-  - **GraphQL Gateway Privado:** Node.js 20 + Express + Apollo Server 3 + DataLoader (`graphql`).
+  - **API Gateway y Microservicios Transaccionales:** Python 3.12 + FastAPI 0.162 + Uvicorn 0.54 sobre TLS interno (`gateway`, `auth`, `clients`, `inventory`, `orders`, `payments`, `notifications`, `servipag-sim`, `mailcheck-sim`).
+  - **GraphQL Gateway Privado:** Node.js 22 LTS + Express 4.22 + Apollo Server 3 + DataLoader (`graphql`), las mismas bibliotecas GraphQL vistas en el curso.
   - **Persistencia y Gestión de Secretos:** MongoDB 7 (con usuarios y credenciales aislados por base de datos), HashiCorp Vault 1.17 (KV v2 con políticas de mínimo privilegio por servicio) y Mailpit (servidor SMTP/API local para recepción verificable de boletas y claves temporales).
 
 ## Resumen de Avances y Brechas Resueltas
@@ -299,7 +299,7 @@ Los siguientes pares solicitud/respuesta se obtuvieron ejecutando `tests/contrac
 Solicitud:
 ```json
 {
-  "email": "ana.perez-2b1ca2@example.cl",
+  "email": "ana.perez-d5e6cd@example.cl",
   "password": "Cliente#2026ok"
 }
 ```
@@ -308,12 +308,12 @@ Respuesta:
 ```json
 {
   "user": {
-    "id": "56c36679-35d5-4e85-adff-679d713d15d6",
+    "id": "3a9020e2-fe0d-4231-86c5-4f5e339f1133",
     "name": "Ana Pérez Soto",
     "role": "cliente"
   },
   "mustChangePassword": false,
-  "csrfToken": "a27d680b8cad…",
+  "csrfToken": "70aa08b52555…",
   "expiresIn": 900
 }
 ```
@@ -332,13 +332,13 @@ Respuesta:
 ```json
 {
   "user": {
-    "id": "56c36679-35d5-4e85-adff-679d713d15d6",
+    "id": "3a9020e2-fe0d-4231-86c5-4f5e339f1133",
     "name": "Ana Pérez Soto",
     "role": "cliente"
   },
   "mustChangePassword": false,
-  "csrfToken": "a27d680b8cad…",
-  "expiresAt": "2026-11-05T03:48:27Z"
+  "csrfToken": "70aa08b52555…",
+  "expiresAt": "2026-11-05T23:10:17Z"
 }
 ```
 
@@ -349,7 +349,7 @@ Respuesta:
 Solicitud:
 ```json
 {
-  "run": "12.613.691-9",
+  "run": "12.786.259-1",
   "name": "Ana Pérez Soto",
   "address": "Av. Pajaritos 1200",
   "comuna": "Maipú",
@@ -357,19 +357,19 @@ Solicitud:
   "region": "Metropolitana",
   "birthDate": "1994-03-21",
   "sex": "F",
-  "email": "ana.perez-2b1ca2@example.cl",
+  "email": "ana.perez-d5e6cd@example.cl",
   "phone": "+56987654321",
   "password": "Cliente#2026ok",
-  "verificationId": "v-0ac609c8751f4bba"
+  "verificationId": "v-51c6f9774c2a4ee9"
 }
 ```
 
 Respuesta:
 ```json
 {
-  "id": "56c36679-35d5-4e85-adff-679d713d15d6",
+  "id": "3a9020e2-fe0d-4231-86c5-4f5e339f1133",
   "name": "Ana Pérez Soto",
-  "email": "ana.perez-2b1ca2@example.cl"
+  "email": "ana.perez-d5e6cd@example.cl"
 }
 ```
 
@@ -380,14 +380,14 @@ Respuesta:
 Solicitud:
 ```json
 {
-  "email": "ana.perez-2b1ca2@example.cl"
+  "email": "ana.perez-d5e6cd@example.cl"
 }
 ```
 
 Respuesta:
 ```json
 {
-  "verificationId": "v-0ac609c8751f4bba",
+  "verificationId": "v-51c6f9774c2a4ee9",
   "valid": true
 }
 ```
@@ -401,10 +401,10 @@ Respuesta:
 {
   "items": [
     {
-      "id": "56c36679-35d5-4e85-adff-679d713d15d6",
-      "run": "12.613.691-9",
+      "id": "3a9020e2-fe0d-4231-86c5-4f5e339f1133",
+      "run": "12.786.259-1",
       "name": "Ana Pérez Soto",
-      "email": "ana.perez-2b1ca2@example.cl",
+      "email": "ana.perez-d5e6cd@example.cl",
       "comuna": "Maipú",
       "phone": "+56987654321"
     }
@@ -423,14 +423,14 @@ Respuesta:
 ```json
 [
   {
-    "id": "271ab0e9-5725-438e-8cfd-ee75e2f995d4",
+    "id": "17ce83b6-6c9d-434f-a21c-8f533c8d5066",
     "name": "Admin Prueba",
-    "email": "admin-8732e45c@example.cl",
+    "email": "admin-2e7be688@example.cl",
     "role": "administrador",
     "active": false
   },
   {
-    "id": "69f794e5-5b1c-4291-8603-f33a0ba289b2",
+    "id": "97a3a031-09da-4cc0-97be-fea8885af952",
     "name": "Administrador",
     "email": "admin@lachilena.local",
     "role": "administrador",
@@ -447,7 +447,7 @@ Solicitud:
 ```json
 {
   "name": "Rosa Tapia",
-  "email": "rosa-c77289@lachilena.cl",
+  "email": "rosa-f9483a@lachilena.cl",
   "role": "despacho"
 }
 ```
@@ -455,9 +455,9 @@ Solicitud:
 Respuesta:
 ```json
 {
-  "id": "84dcb51e-8e22-46ec-9455-2134a95d1288",
+  "id": "b3cb81d9-03d2-476f-a8dc-1eebfb760125",
   "name": "Rosa Tapia",
-  "email": "rosa-c77289@lachilena.cl",
+  "email": "rosa-f9483a@lachilena.cl",
   "role": "despacho",
   "active": true
 }
@@ -465,7 +465,7 @@ Respuesta:
 
 </details>
 
-<details><summary><code>S09</code> · <code>DELETE /api/v1/users/84dcb51e-8e22-46ec-9455-2134a95d1288</code> → <code>204</code></summary>
+<details><summary><code>S09</code> · <code>DELETE /api/v1/users/b3cb81d9-03d2-476f-a8dc-1eebfb760125</code> → <code>204</code></summary>
 
 Respuesta: sin cuerpo.
 
@@ -520,7 +520,7 @@ Respuesta:
       "price": 2500,
       "description": "Carne molida, cebolla, huevo duro, aceituna y pasas. La clásica chilena.",
       "available": true,
-      "updatedAt": "2026-11-05T03:30:30Z"
+      "updatedAt": "2026-11-05T22:52:07Z"
     }
   ]
 }
@@ -533,7 +533,7 @@ Respuesta:
 Solicitud:
 ```json
 {
-  "name": "Empanada de pollo 2fa7",
+  "name": "Empanada de pollo 5588",
   "category": "horno",
   "price": 2600,
   "description": "Pollo, pimentón y cebolla."
@@ -543,19 +543,19 @@ Solicitud:
 Respuesta:
 ```json
 {
-  "id": "p-473733043f",
-  "name": "Empanada de pollo 2fa7",
+  "id": "p-281c97ea8a",
+  "name": "Empanada de pollo 5588",
   "category": "horno",
   "price": 2600,
   "description": "Pollo, pimentón y cebolla.",
   "available": true,
-  "updatedAt": "2026-11-05T03:33:40Z"
+  "updatedAt": "2026-11-05T22:55:29Z"
 }
 ```
 
 </details>
 
-<details><summary><code>S13</code> · <code>PUT /api/v1/admin/products/p-473733043f/availability</code> → <code>200</code></summary>
+<details><summary><code>S13</code> · <code>PUT /api/v1/admin/products/p-281c97ea8a/availability</code> → <code>200</code></summary>
 
 Solicitud:
 ```json
@@ -567,14 +567,14 @@ Solicitud:
 Respuesta:
 ```json
 {
-  "id": "p-473733043f",
+  "id": "p-281c97ea8a",
   "available": false
 }
 ```
 
 </details>
 
-<details><summary><code>S14</code> · <code>DELETE /api/v1/admin/products/p-473733043f</code> → <code>204</code></summary>
+<details><summary><code>S14</code> · <code>DELETE /api/v1/admin/products/p-281c97ea8a</code> → <code>204</code></summary>
 
 Respuesta: sin cuerpo.
 
@@ -582,7 +582,7 @@ Respuesta: sin cuerpo.
 
 <details><summary><code>S15</code> · <code>POST /api/v1/orders</code> → <code>201</code></summary>
 
-Cabeceras adicionales: `Idempotency-Key: 8bb4ca87ef164899b4fe7d0d82c87f20`
+Cabeceras adicionales: `Idempotency-Key: 83fc65e3c89441a78ba583016be7fd81`
 
 Solicitud:
 ```json
@@ -626,7 +626,7 @@ Respuesta:
     "status": "pendiente",
     "instructions": "Realiza el depósito de $8.150 y presenta el comprobante al cajero"
   },
-  "createdAt": "2026-11-05T03:33:27.234Z"
+  "createdAt": "2026-11-05T22:55:17.320Z"
 }
 ```
 
@@ -640,7 +640,7 @@ Respuesta:
   "items": [
     {
       "id": "ORD-2026-1105-0008",
-      "createdAt": "2026-11-05T03:33:27.234Z",
+      "createdAt": "2026-11-05T22:55:17.320Z",
       "status": "pendiente_pago",
       "itemsCount": 3,
       "total": 8150,
@@ -677,11 +677,11 @@ Respuesta:
   ],
   "total": 8150,
   "paymentMethod": "deposito",
-  "createdAt": "2026-11-05T03:33:27.234Z",
+  "createdAt": "2026-11-05T22:55:17.320Z",
   "history": [
     {
       "status": "pendiente_pago",
-      "at": "2026-11-05T03:33:27.234Z"
+      "at": "2026-11-05T22:55:17.320Z"
     }
   ],
   "deliveryAddress": "Av. 5 de Abril 450, Maipú"
@@ -704,7 +704,7 @@ Respuesta:
 {
   "id": "ORD-2026-1105-0009",
   "status": "anulado",
-  "cancelledAt": "2026-11-05T03:33:39.985Z",
+  "cancelledAt": "2026-11-05T22:55:29.212Z",
   "cancelledBy": "cliente"
 }
 ```
@@ -737,7 +737,7 @@ Respuesta:
     },
     {
       "id": "ORD-2026-1105-0002",
-      "createdAt": "2026-11-05T03:33:00.213Z",
+      "createdAt": "2026-11-05T22:54:50.387Z",
       "status": "pendiente_pago",
       "total": 2500,
       "paymentMethod": "deposito",
@@ -763,7 +763,7 @@ Respuesta:
 Solicitud:
 ```json
 {
-  "reference": "DEP-2026-94CF59"
+  "reference": "DEP-2026-09E771"
 }
 ```
 
@@ -772,7 +772,7 @@ Respuesta:
 {
   "orderId": "ORD-2026-1105-0008",
   "status": "pagado",
-  "paidAt": "2026-11-05T03:33:39.829Z",
+  "paidAt": "2026-11-05T22:55:29.027Z",
   "receiptId": "BOL-000005"
 }
 ```
@@ -786,7 +786,7 @@ Cabeceras adicionales: `X-Signature: <HMAC-SHA256 hex>`, `X-Timestamp: <epoch s>
 Solicitud:
 ```json
 {
-  "eventId": "evt-c3b634c22d10",
+  "eventId": "evt-662c75849566",
   "orderRef": "ORD-2026-1105-0009",
   "amount": 5610,
   "status": "approved"
@@ -809,7 +809,7 @@ Respuesta:
 {
   "receiptId": "BOL-000005",
   "orderId": "ORD-2026-1105-0008",
-  "issuedAt": "2026-11-05T03:33:39.845Z",
+  "issuedAt": "2026-11-05T22:55:29.045Z",
   "items": [
     {
       "name": "Empanada de pino",
@@ -844,7 +844,7 @@ Respuesta:
 {
   "id": "ORD-2026-1105-0008",
   "status": "en_preparacion",
-  "updatedAt": "2026-11-05T03:33:39.885Z"
+  "updatedAt": "2026-11-05T22:55:29.083Z"
 }
 ```
 
@@ -882,14 +882,14 @@ Respuesta:
   "orders": [
     {
       "id": "ORD-2026-1105-0009",
-      "createdAt": "2026-11-05T03:33:39.924Z",
+      "createdAt": "2026-11-05T22:55:29.149Z",
       "clientName": "Ana Pérez Soto",
       "status": "anulado",
       "total": 5610
     },
     {
       "id": "ORD-2026-1105-0008",
-      "createdAt": "2026-11-05T03:33:27.234Z",
+      "createdAt": "2026-11-05T22:55:17.320Z",
       "clientName": "Ana Pérez Soto",
       "status": "en_preparacion",
       "total": 8150
@@ -910,11 +910,11 @@ Respuesta:
 {
   "items": [
     {
-      "id": "pr-ced3cf0125",
+      "id": "pr-ce26c8dc56",
       "name": "Martes de pollo",
       "description": "Descuento para clientes registrados.",
-      "productId": "p-473733043f",
-      "productName": "Empanada de pollo 2fa7",
+      "productId": "p-281c97ea8a",
+      "productName": "Empanada de pollo 5588",
       "discountPercent": 20,
       "audience": "registrados",
       "startsAt": "2026-11-05",
@@ -934,7 +934,7 @@ Solicitud:
 {
   "name": "Martes de pollo",
   "description": "Descuento para clientes registrados.",
-  "productId": "p-473733043f",
+  "productId": "p-281c97ea8a",
   "discountPercent": 20,
   "audience": "registrados",
   "startsAt": "2026-11-05",
@@ -945,14 +945,14 @@ Solicitud:
 Respuesta:
 ```json
 {
-  "id": "pr-ced3cf0125",
+  "id": "pr-ce26c8dc56",
   "active": true
 }
 ```
 
 </details>
 
-<details><summary><code>S27</code> · <code>PUT /api/v1/admin/promotions/pr-ced3cf0125/active</code> → <code>200</code></summary>
+<details><summary><code>S27</code> · <code>PUT /api/v1/admin/promotions/pr-ce26c8dc56/active</code> → <code>200</code></summary>
 
 Solicitud:
 ```json
@@ -964,14 +964,14 @@ Solicitud:
 Respuesta:
 ```json
 {
-  "id": "pr-ced3cf0125",
+  "id": "pr-ce26c8dc56",
   "active": false
 }
 ```
 
 </details>
 
-<details><summary><code>S28</code> · <code>DELETE /api/v1/admin/promotions/pr-ced3cf0125</code> → <code>204</code></summary>
+<details><summary><code>S28</code> · <code>DELETE /api/v1/admin/promotions/pr-ce26c8dc56</code> → <code>204</code></summary>
 
 Respuesta: sin cuerpo.
 
@@ -991,12 +991,12 @@ Respuesta: sin cuerpo.
 
 </details>
 
-<details><summary><code>S30</code> · <code>PUT /api/v1/admin/products/p-473733043f</code> → <code>200</code></summary>
+<details><summary><code>S30</code> · <code>PUT /api/v1/admin/products/p-281c97ea8a</code> → <code>200</code></summary>
 
 Solicitud:
 ```json
 {
-  "name": "Empanada de pollo 2fa7",
+  "name": "Empanada de pollo 5588",
   "category": "horno",
   "price": 2700,
   "description": "Pollo, pimentón, cebolla y aceituna."
@@ -1006,19 +1006,19 @@ Solicitud:
 Respuesta:
 ```json
 {
-  "id": "p-473733043f",
-  "name": "Empanada de pollo 2fa7",
+  "id": "p-281c97ea8a",
+  "name": "Empanada de pollo 5588",
   "category": "horno",
   "price": 2700,
   "description": "Pollo, pimentón, cebolla y aceituna.",
   "available": true,
-  "updatedAt": "2026-11-05T03:33:40Z"
+  "updatedAt": "2026-11-05T22:55:29Z"
 }
 ```
 
 </details>
 
-<details><summary><code>S31</code> · <code>PUT /api/v1/users/84dcb51e-8e22-46ec-9455-2134a95d1288</code> → <code>200</code></summary>
+<details><summary><code>S31</code> · <code>PUT /api/v1/users/b3cb81d9-03d2-476f-a8dc-1eebfb760125</code> → <code>200</code></summary>
 
 Solicitud:
 ```json
@@ -1032,9 +1032,9 @@ Solicitud:
 Respuesta:
 ```json
 {
-  "id": "84dcb51e-8e22-46ec-9455-2134a95d1288",
+  "id": "b3cb81d9-03d2-476f-a8dc-1eebfb760125",
   "name": "Rosa Tapia",
-  "email": "rosa-c77289@lachilena.cl",
+  "email": "rosa-f9483a@lachilena.cl",
   "role": "cajero",
   "active": true
 }
@@ -1042,15 +1042,15 @@ Respuesta:
 
 </details>
 
-<details><summary><code>S32</code> · <code>GET /api/v1/clients/56c36679-35d5-4e85-adff-679d713d15d6</code> → <code>200</code></summary>
+<details><summary><code>S32</code> · <code>GET /api/v1/clients/3a9020e2-fe0d-4231-86c5-4f5e339f1133</code> → <code>200</code></summary>
 
 Respuesta:
 ```json
 {
-  "id": "56c36679-35d5-4e85-adff-679d713d15d6",
-  "run": "12.613.691-9",
+  "id": "3a9020e2-fe0d-4231-86c5-4f5e339f1133",
+  "run": "12.786.259-1",
   "name": "Ana Pérez Soto",
-  "email": "ana.perez-2b1ca2@example.cl",
+  "email": "ana.perez-d5e6cd@example.cl",
   "address": "Av. Pajaritos 1200",
   "comuna": "Maipú",
   "provincia": "Santiago",
@@ -1061,7 +1061,7 @@ Respuesta:
 
 </details>
 
-<details><summary><code>S33</code> · <code>PUT /api/v1/clients/56c36679-35d5-4e85-adff-679d713d15d6</code> → <code>200</code></summary>
+<details><summary><code>S33</code> · <code>PUT /api/v1/clients/3a9020e2-fe0d-4231-86c5-4f5e339f1133</code> → <code>200</code></summary>
 
 Solicitud:
 ```json
@@ -1078,10 +1078,10 @@ Solicitud:
 Respuesta:
 ```json
 {
-  "id": "56c36679-35d5-4e85-adff-679d713d15d6",
-  "run": "12.613.691-9",
+  "id": "3a9020e2-fe0d-4231-86c5-4f5e339f1133",
+  "run": "12.786.259-1",
   "name": "Ana Pérez Soto",
-  "email": "ana.perez-2b1ca2@example.cl",
+  "email": "ana.perez-d5e6cd@example.cl",
   "address": "Av. 5 de Abril 450",
   "comuna": "Maipú",
   "provincia": "Santiago",
@@ -1143,7 +1143,7 @@ Respuesta:
       "historial": [
         {
           "estado": "PENDIENTE_PAGO",
-          "en": "2026-11-05T03:33:27.234Z"
+          "en": "2026-11-05T22:55:17.320Z"
         }
       ],
       "direccionEntrega": "Av. 5 de Abril 450, Maipú"
@@ -1989,7 +1989,7 @@ Respuesta real con datos ficticios (`evidencias/contratos.json`). Combina `order
       "historial": [
         {
           "estado": "PENDIENTE_PAGO",
-          "en": "2026-11-05T03:33:27.234Z"
+          "en": "2026-11-05T22:55:17.320Z"
         }
       ],
       "direccionEntrega": "Av. 5 de Abril 450, Maipú"
@@ -2030,27 +2030,29 @@ Medición real (no proyección), registrada en `evidencias/loadtest.log` y `evid
 
 | Escenario | Usuarios | Solicitudes | Req/s | p50 ms | p95 ms | p99 ms | Errores | Objetivo p95 | Resultado |
 |---|---|---|---|---|---|---|---|---|---|
-| `L1` catálogo, estrés (`S10`) | 50 | 11811 | 196.3 | 208.1 | 555.5 | 805.4 | 0.0 % | `< 200 ms` | **No cumple** (3,9× la tasa punta proyectada) |
-| `L1b` catálogo a 50 req/s (`S10`) | 50 | 2998 | 49.2 | 6.7 | 9.8 | 12.7 | 0.0 % | `< 200 ms` | **Cumple** |
-| `L2` crear pedido (`S15`) | 10 | 3536 | 58.8 | 158.2 | 247.0 | 325.5 | 0.0 % | `< 800 ms` | **Cumple** (12× la tasa proyectada) |
-| `L3` reporte de ventas (`S24`) | 5 | 5567 | 92.7 | 50.7 | 79.5 | 100.9 | 0.0 % | `< 1000 ms` | **Cumple** |
-| `L4` GraphQL `misPedidos` | 20 | 6366 | 105.9 | 179.0 | 287.9 | 351.1 | 0.0 % | `< 600 ms` | **Cumple** (7× la tasa proyectada) |
+| `L1` catálogo, estrés (`S10`) | 50 | 10112 | 168.0 | 243.3 | 671.4 | 978.1 | 0.0 % | `< 200 ms` | **No cumple** (3,4× la tasa punta proyectada) |
+| `L1b` catálogo a 50 req/s (`S10`) | 50 | 2998 | 49.2 | 8.1 | 12.2 | 16.5 | 0.0 % | `< 200 ms` | **Cumple** |
+| `L2` crear pedido (`S15`) | 10 | 2666 | 44.3 | 212.2 | 307.1 | 417.3 | 0.0 % | `< 800 ms` | **Cumple** (9× la tasa proyectada) |
+| `L3` reporte de ventas (`S24`) | 5 | 3919 | 65.3 | 71.1 | 115.0 | 146.2 | 0.0 % | `< 1000 ms` | **Cumple** |
+| `L4` GraphQL `misPedidos` | 20 | 6086 | 101.3 | 172.6 | 358.4 | 479.4 | 0.0 % | `< 600 ms` | **Cumple** (7× la tasa proyectada) |
 
 Consumo durante toda la prueba (muestreo de `docker stats` cada ~3 s; 100 % equivale a un núcleo):
 
 | Contenedor | CPU promedio | CPU máxima | Memoria máxima |
 |---|---|---|---|
-| `mongo` | 58.0 % | 216.5 % | 351 MiB |
-| `gateway` | 65.4 % | 107.0 % | 70 MiB |
-| `orders` | 43.7 % | 124.3 % | 65 MiB |
-| `auth` | 25.0 % | 66.8 % | 82 MiB |
-| `graphql` | 9.2 % | 56.5 % | 76 MiB |
-| `inventory` | 15.6 % | 41.6 % | 63 MiB |
-| `payments` | 6.1 % | 25.7 % | 61 MiB |
-| `clients` | 4.0 % | 20.3 % | 55 MiB |
-| `vault` | 3.9 % | 35.0 % | 201 MiB |
+| `mongo` | 70.1 % | 331.3 % | 378 MiB |
+| `gateway` | 66.3 % | 99.3 % | 54 MiB |
+| `orders` | 41.1 % | 127.6 % | 64 MiB |
+| `auth` | 21.0 % | 52.3 % | 77 MiB |
+| `graphql` | 6.9 % | 34.3 % | 78 MiB |
+| `inventory` | 16.3 % | 52.4 % | 65 MiB |
+| `payments` | 5.9 % | 40.3 % | 55 MiB |
+| `clients` | 3.7 % | 15.1 % | 56 MiB |
+| `vault` | 8.1 % | 36.0 % | 265 MiB |
 
-**Lectura de los resultados.** A la carga proyectada para el Caso 19 (`L1b`) el catálogo responde con p95 de 10 ms, casi 20 veces por debajo del objetivo. `L1` muestra el límite del despliegue actual: con unas 196 req/s sostenidas sin pausa, el gateway (un solo proceso Python que termina TLS y reenvía a `inventory`) se satura y el p95 sube a 556 ms, aunque sin errores. Ese umbral está por sobre 3 veces la punta proyectada; si el negocio creciera hasta ese nivel, la respuesta adecuada es escalar horizontalmente el gateway (varias réplicas con el límite de solicitudes compartido en un almacén común) y agregar caché HTTP del catálogo público. No se necesita big data ni gRPC. Las pruebas de carga también sirvieron para detectar y corregir un defecto real: el número de pedido se generaba al azar entre 10.000 valores diarios y empezó a colisionar con miles de pedidos en el día (1,3 % de `503` en `L2`). Ahora usa un correlativo diario atómico (`counters` en `orders`) y `L2` no registra errores.
+**Variabilidad y efecto de la actualización de dependencias.** En el mismo equipo, mediciones repetidas del mismo escenario varían alrededor de ±15 %. Al actualizar FastAPI, Starlette y Uvicorn se comparó el escenario del catálogo (50 usuarios sin pausa, 30 s) alternando versiones: 172 y 142 req/s con las nuevas, 169 y 174 req/s con las anteriores. La actualización no cambia el rendimiento de forma medible.
+
+**Lectura de los resultados.** A la carga proyectada para el Caso 19 (`L1b`) el catálogo responde con p95 de 12 ms, casi 20 veces por debajo del objetivo. `L1` muestra el límite del despliegue actual: con unas 168 req/s sostenidas sin pausa, el gateway (un solo proceso Python que termina TLS y reenvía a `inventory`) se satura y el p95 sube a 671 ms, aunque sin errores. Ese umbral está por sobre 3 veces la punta proyectada; si el negocio creciera hasta ese nivel, la respuesta adecuada es escalar horizontalmente el gateway (varias réplicas con el límite de solicitudes compartido en un almacén común) y agregar caché HTTP del catálogo público. No se necesita big data ni gRPC. Las pruebas de carga también sirvieron para detectar y corregir un defecto real: el número de pedido se generaba al azar entre 10.000 valores diarios y empezó a colisionar con miles de pedidos en el día (1,3 % de `503` en `L2`). Ahora usa un correlativo diario atómico (`counters` en `orders`) y `L2` no registra errores.
 
 ### ADR-001 — Aplicabilidad de Subsistema de Analítica Separado y Comunicación gRPC
 
@@ -2064,6 +2066,15 @@ Consumo durante toda la prueba (muestreo de `docker stats` cada ~3 s; 100 % equi
   - Con un volumen del orden de $10^2$ pedidos diarios ($\sim 3,6 \times 10^4$ pedidos anuales), el conjunto completo de datos de un año ocupa menos de $50\text{ MB}$ en RAM dentro del motor WiredTiger de MongoDB. El índice compuesto `[("status", 1), ("createdAt", 1)]` permite ejecutar las dos agregaciones de `S24` (totales y top 20 de productos) en pocos milisegundos sin afectar las escrituras transaccionales.
   - No existe ningún flujo de telemetría continua de alta frecuencia (como GPS segundo a segundo de flotas masivas) ni procesamiento intensivo de CPU que justifique streaming gRPC; las transiciones de cocina y despacho (`pagado` → `en_preparacion` → `despachado` → `entregado`) son eventos humanos discretos accionados desde `despacho.html`.
   - Mantener un único protocolo interno (HTTPS REST con clientes persistentes, plazos de 2–3 s y correlación) reduce la superficie de ataque y simplifica la auditoría de seguridad, y cumple los objetivos de latencia p95 a la carga proyectada según la medición de `tests/loadtest.py` (`L1b`, `L2`, `L3` y `L4`). La prueba de estrés `L1` identifica el gateway como primer cuello de botella al triplicar la punta proyectada; su mitigación es escalar réplicas del gateway, no cambiar el protocolo interno.
+
+### ADR-002 — Mensajería Asíncrona: Outbox Persistente en lugar de un Broker STOMP
+
+- **Estado:** Aceptado.
+- **Contexto:** Tres flujos no deben bloquear ni perderse si el destino falla: el envío de claves temporales (`auth` → `notifications`), el envío de boletas (`payments` → `notifications`) y los avisos de anulación o reembolso (`orders` → `payments`). El curso presentó la mensajería con un broker STOMP (productor y consumidor sobre una cola `/queue/...` con `ack` individual).
+- **Alternativas:** (1) un broker STOMP (ActiveMQ o RabbitMQ) con productores en cada servicio y consumidores en `notifications` y `payments`; (2) un patrón Outbox: cada servicio guarda el mensaje en su propia base, en la misma operación de negocio, y un proceso en segundo plano lo entrega por HTTPS autenticado, con reintentos (`common/lachilena_common/outbox.py`).
+- **Decisión:** Alternativa 2.
+- **Justificación:** El volumen es de decenas de mensajes por día y no hay varios consumidores por mensaje. El Outbox entrega la misma garantía que necesita el caso (el mensaje persiste y se reintenta hasta 5 veces, y las entregas repetidas son idempotentes en el destino) sin sumar un componente más que asegurar, con sus propias credenciales y su propia red. Si el negocio creciera, por ejemplo con varios locales o notificaciones por SMS y correo en paralelo, el proceso del Outbox puede publicar en una cola STOMP sin cambiar a los productores.
+- **Consecuencias:** No hay broker que operar. La latencia de entrega es de hasta 5 a 10 s (el intervalo del Outbox), aceptable para correos y avisos. Los mensajes que fallan 5 veces quedan con `status: "failed"` para revisión, y los que contienen claves temporales se eliminan a las 24 h por índice TTL.
 
 ## Módulo 10 — Puesta en Marcha, Cuentas de Prueba y Ejecución de Pruebas
 
@@ -2181,6 +2192,33 @@ docker compose run --rm tests python contracts.py
 | Mantenedores: editar producto, usuario y cliente (administrador) | ![](evidencias/capturas/13-editar-producto.png) ![](evidencias/capturas/15-editar-usuario.png) ![](evidencias/capturas/16-editar-cliente-admin.png) |
 | Reporte de ventas (administrador y dueño) | ![](evidencias/capturas/17-reporte-ventas.png) |
 | Diseño móvil | ![](evidencias/capturas/18-movil-catalogo.png) ![](evidencias/capturas/19-movil-mis-pedidos.png) |
+
+### Dependencias y Auditoría de Seguridad
+
+Todas las dependencias tienen versión fija: `requirements.txt` para los servicios Python, `services/graphql/package-lock.json` (instalado con `npm ci`) para el GraphQL Gateway, e imágenes base con etiqueta o digest en los Dockerfiles y en `docker-compose.yml`.
+
+| Componente | Versión | Uso |
+|---|---|---|
+| Python / FastAPI / Starlette / Uvicorn | 3.12 / 0.162.0 / 1.10.0 / 0.54.0 | Servicios Python y API Gateway (ASGI sobre TLS) |
+| Pydantic / httpx | 2.14.3 / 0.28.1 | Validación de contratos y clientes HTTPS entre servicios |
+| Motor / PyMongo | 3.7.1 / 4.19.0 | Acceso asíncrono a MongoDB 7 |
+| argon2-cffi | 25.1.0 | Hash Argon2id de contraseñas |
+| Node.js / Express / Apollo Server / graphql / DataLoader | 22 LTS / 4.22.3 / 3.13.0 / 15.10.1 / 2.2.2 | GraphQL Gateway |
+
+Comprobación reproducible:
+
+```bash
+pip install pip-audit && pip-audit -r requirements.txt
+cd services/graphql && npm ci && npm audit --omit=dev
+```
+
+**Resultado:** `pip-audit` no reporta vulnerabilidades conocidas. La revisión subió FastAPI, Starlette, Uvicorn y PyMongo, porque las versiones anteriores tenían avisos publicados; el más relevante era una denegación de servicio por la cabecera `Range` en `FileResponse`, que el gateway usa para servir el frontend. `npm audit` solo reporta avisos de **Apollo Server 3**, cuyo soporte terminó y no recibe correcciones (`apollo-server-core`, `@graphql-tools/*` y `uuid`). Se mantiene porque es la versión usada en el curso, y en este despliegue esos avisos no son explotables:
+
+- El aviso de XS-Search/CSRF de Apollo requiere que un navegador invoque Apollo directamente. Aquí el GraphQL Gateway está solo en la red `private`, exige la credencial del API Gateway y solo recibe `POST` JSON que ya pasó por la validación de origen, sesión y token CSRF.
+- La contaminación de prototipo de `mergeDeep` (`@graphql-tools/utils`) ocurre al combinar schemas al arrancar, con el schema propio del proyecto, nunca con datos de una solicitud.
+- El aviso de `uuid` exige pasar un buffer propio a `v3`/`v5`/`v6`, cosa que ninguna parte del código hace.
+
+La migración a `@apollo/server` 4 o superior queda como mejora siguiente, si el curso lo permite.
 
 ### 5. Resultados de la ejecución registrada en `evidencias/`
 
